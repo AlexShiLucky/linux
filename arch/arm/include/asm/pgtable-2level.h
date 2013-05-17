@@ -155,6 +155,19 @@
 #define pud_clear(pudp)		do { } while (0)
 #define set_pud(pud,pudp)	do { } while (0)
 
+static inline int pmd_thp_or_huge(pmd_t pmd)
+{
+	if ((pmd_val(pmd) & PMD_TYPE_MASK) == PMD_TYPE_FAULT)
+		return pmd_val(pmd);
+
+	return ((pmd_val(pmd) & PMD_TYPE_MASK) == PMD_TYPE_SECT);
+}
+
+static inline int pte_huge(pte_t pte)
+{
+	return pmd_thp_or_huge(__pmd(pte_val(pte)));
+}
+
 static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 {
 	return (pmd_t *)pud;
@@ -183,11 +196,87 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
 #define set_pte_ext(ptep,pte,ext) cpu_set_pte_ext(ptep,pte,ext)
 
 /*
- * We don't have huge page support for short descriptors, for the moment
- * define empty stubs for use by pin_page_for_write.
+ * now follows some of the definitions to allow huge page support, we can't put
+ * these in the hugetlb source files as they are also required for transparent
+ * hugepage support.
  */
-#define pmd_hugewillfault(pmd)	(0)
-#define pmd_thp_or_huge(pmd)	(0)
+
+#define HPAGE_SHIFT             PMD_SHIFT
+#define HPAGE_SIZE              (_AC(1, UL) << HPAGE_SHIFT)
+#define HPAGE_MASK              (~(HPAGE_SIZE - 1))
+#define HUGETLB_PAGE_ORDER      (HPAGE_SHIFT - PAGE_SHIFT)
+
+/*
+ *  We re-purpose the following domain bits in the section descriptor
+ */
+#define PMD_DSECT_DIRTY		(_AT(pmdval_t, 1) << 5)
+#define PMD_DSECT_AF		(_AT(pmdval_t, 1) << 6)
+
+#define PMD_BIT_FUNC(fn,op) \
+static inline pmd_t pmd_##fn(pmd_t pmd) { pmd_val(pmd) op; return pmd; }
+
+static inline unsigned long pmd_pfn(pmd_t pmd)
+{
+	/*
+	 * for a section, we need to mask off more of the pmd
+	 * before looking up the pfn.
+	 */
+	if (pmd_thp_or_huge(pmd))
+		return __phys_to_pfn(pmd_val(pmd) & HPAGE_MASK);
+	else
+		return __phys_to_pfn(pmd_val(pmd) & PHYS_MASK);
+}
+
+extern pgprot_t get_huge_pgprot(pgprot_t newprot);
+
+#define pfn_pmd(pfn,prot) __pmd(__pfn_to_phys(pfn) | pgprot_val(prot));
+#define mk_pmd(page,prot) pfn_pmd(page_to_pfn(page),get_huge_pgprot(prot));
+
+PMD_BIT_FUNC(mkdirty, |= PMD_DSECT_DIRTY);
+PMD_BIT_FUNC(mkwrite, |= PMD_SECT_AP_WRITE);
+PMD_BIT_FUNC(wrprotect,	&= ~PMD_SECT_AP_WRITE);
+PMD_BIT_FUNC(mknexec,	|= PMD_SECT_XN);
+PMD_BIT_FUNC(rmprotnone, |= PMD_TYPE_SECT);
+PMD_BIT_FUNC(mkyoung, |= PMD_DSECT_AF);
+
+#define pmd_young(pmd)			(pmd_val(pmd) & PMD_DSECT_AF)
+#define pmd_write(pmd)			(pmd_val(pmd) & PMD_SECT_AP_WRITE)
+#define pmd_exec(pmd)			(!(pmd_val(pmd) & PMD_SECT_XN))
+#define pmd_dirty(pmd)			(pmd_val(pmd) & PMD_DSECT_DIRTY)
+
+#define pmd_hugewillfault(pmd)		(!pmd_young(pmd) || !pmd_write(pmd))
+
+#define __HAVE_ARCH_PMD_WRITE
+
+extern void __sync_icache_dcache(unsigned long pfn, int exec);
+
+static inline void set_pmd_at(struct mm_struct *mm, unsigned long addr,
+				pmd_t *pmdp, pmd_t pmd)
+{
+	VM_BUG_ON((pmd_val(pmd) & PMD_TYPE_MASK) == PMD_TYPE_TABLE);
+
+	if (!pmd_val(pmd)) {
+		pmdp[0] = pmdp[1] = pmd;
+	} else {
+		pmdp[0] = __pmd(pmd_val(pmd));
+		pmdp[1] = __pmd(pmd_val(pmd) + SECTION_SIZE);
+
+		__sync_icache_dcache(pmd_pfn(pmd), pmd_exec(pmd));
+	}
+
+	flush_pmd_entry(pmdp);
+}
+
+static inline pmd_t pmd_modify(pmd_t pmd, pgprot_t newprot)
+{
+	pgprot_t hugeprot = get_huge_pgprot(newprot);
+	const pmdval_t mask = PMD_SECT_XN | PMD_SECT_AP_WRITE |
+				PMD_TYPE_SECT;
+
+	pmd_val(pmd) = (pmd_val(pmd) & ~mask) | (pgprot_val(hugeprot) & mask);
+
+	return pmd;
+}
 
 #endif /* __ASSEMBLY__ */
 

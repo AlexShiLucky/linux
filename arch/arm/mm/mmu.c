@@ -389,6 +389,44 @@ SET_MEMORY_FN(x, pte_set_x)
 SET_MEMORY_FN(nx, pte_set_nx)
 
 /*
+ * If the system supports huge pages and we are running with short descriptors,
+ * then compute the pgprot values for a huge page. We do not need to do this
+ * with LPAE as there is no software/hardware bit distinction for ptes.
+ *
+ * We are only interested in:
+ * 1) The memory type: huge pages are user pages so a section of type
+ *    MT_MEMORY_RW. This is used to create new huge ptes/thps.
+ *
+ * 2) XN, PROT_NONE, WRITE. These are set/unset through protection changes
+ *    by pte_modify or pmd_modify and are used to make new ptes/thps.
+ *
+ * The other bits: dirty, young, splitting are not modified by pte_modify
+ * or pmd_modify nor are they used to create new ptes or pmds thus they are not
+ * considered here.
+ */
+#if defined(CONFIG_SYS_SUPPORTS_HUGETLBFS) && !defined(CONFIG_ARM_LPAE)
+static pgprot_t _hugepgprotval;
+
+pgprot_t get_huge_pgprot(pgprot_t newprot)
+{
+	pte_t inprot = __pte(pgprot_val(newprot));
+	pmd_t pmdret = __pmd(pgprot_val(_hugepgprotval));
+
+	if (!pte_exec(inprot))
+		pmdret = pmd_mknexec(pmdret);
+
+	if (pte_write(inprot))
+		pmdret = pmd_mkwrite(pmdret);
+
+	if (!pte_protnone(inprot))
+		pmdret = pmd_rmprotnone(pmdret);
+
+	return __pgprot(pmd_val(pmdret));
+}
+#endif
+
+
+/*
  * Adjust the PMD section entries according to the CPU in use.
  */
 static void __init build_mem_type_table(void)
@@ -627,6 +665,19 @@ static void __init build_mem_type_table(void)
 		if (t->prot_sect)
 			t->prot_sect |= PMD_DOMAIN(t->domain);
 	}
+
+#if defined(CONFIG_SYS_SUPPORTS_HUGETLBFS) && !defined(CONFIG_ARM_LPAE)
+	/*
+	 * we assume all huge pages are user pages and that hardware access
+	 * flag updates are disabled (which is the case for short descriptors).
+	 */
+	pgprot_val(_hugepgprotval) = mem_types[MT_MEMORY_RW].prot_sect
+					| PMD_SECT_AP_READ | PMD_SECT_nG;
+
+	pgprot_val(_hugepgprotval) &= ~(PMD_SECT_AP_WRITE | PMD_SECT_XN
+					| PMD_TYPE_SECT);
+#endif
+
 }
 
 #ifdef CONFIG_ARM_DMA_MEM_BUFFERABLE

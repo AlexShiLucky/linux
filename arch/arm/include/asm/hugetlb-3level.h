@@ -22,6 +22,7 @@
 #ifndef _ASM_ARM_HUGETLB_3LEVEL_H
 #define _ASM_ARM_HUGETLB_3LEVEL_H
 
+#include <asm-generic/hugetlb.h>
 
 /*
  * If our huge pte is non-zero then mark the valid bit.
@@ -66,6 +67,11 @@ static inline int huge_ptep_set_access_flags(struct vm_area_struct *vma,
 					     pte_t pte, int dirty)
 {
 	return ptep_set_access_flags(vma, addr, ptep, pte, dirty);
+}
+
+static inline pte_t huge_pte_wrprotect(pte_t pte)
+{
+	return pte_wrprotect(pte);
 }
 
 #endif /* _ASM_ARM_HUGETLB_3LEVEL_H */

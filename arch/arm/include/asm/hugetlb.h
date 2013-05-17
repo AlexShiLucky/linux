@@ -23,9 +23,12 @@
 #define _ASM_ARM_HUGETLB_H
 
 #include <asm/page.h>
-#include <asm-generic/hugetlb.h>
 
+#ifdef CONFIG_ARM_LPAE
 #include <asm/hugetlb-3level.h>
+#else
+#include <asm/hugetlb-2level.h>
+#endif
 
 static inline void hugetlb_free_pgd_range(struct mmu_gather *tlb,
 					  unsigned long addr, unsigned long end,
@@ -60,11 +63,6 @@ static inline void hugetlb_prefault_arch_hook(struct mm_struct *mm)
 static inline int huge_pte_none(pte_t pte)
 {
 	return pte_none(pte);
-}
-
-static inline pte_t huge_pte_wrprotect(pte_t pte)
-{
-	return pte_wrprotect(pte);
 }
 
 static inline int arch_prepare_hugepage(struct page *page)

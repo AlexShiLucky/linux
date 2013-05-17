@@ -491,19 +491,6 @@ do_translation_fault(unsigned long addr, unsigned int fsr,
 #endif					/* CONFIG_MMU */
 
 /*
- * Some section permission faults need to be handled gracefully.
- * They can happen due to a __{get,put}_user during an oops.
- */
-#ifndef CONFIG_ARM_LPAE
-static int
-do_sect_fault(unsigned long addr, unsigned int fsr, struct pt_regs *regs)
-{
-	do_bad_area(addr, fsr, regs);
-	return 0;
-}
-#endif /* CONFIG_ARM_LPAE */
-
-/*
  * This abort handler always returns "fault".
  */
 static int
