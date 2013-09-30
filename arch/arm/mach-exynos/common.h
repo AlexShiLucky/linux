@@ -167,12 +167,12 @@ extern void __iomem *cpu_boot_reg_base(void);
 
 static inline void pmu_raw_writel(u32 val, u32 offset)
 {
-	__raw_writel(val, pmu_base_addr + offset);
+	writel_relaxed(val, pmu_base_addr + offset);
 }
 
 static inline u32 pmu_raw_readl(u32 offset)
 {
-	return __raw_readl(pmu_base_addr + offset);
+	return readl_relaxed(pmu_base_addr + offset);
 }
 
 #endif /* __ARCH_ARM_MACH_EXYNOS_COMMON_H */

@@ -25,7 +25,7 @@ void samsung_sync_wakemask(void __iomem *reg,
 	struct irq_data *data;
 	u32 val;
 
-	val = __raw_readl(reg);
+	val = readl_relaxed(reg);
 
 	for (; nr_mask > 0; nr_mask--, mask++) {
 		if (mask->irq == NO_WAKEUP_IRQ) {
@@ -42,6 +42,6 @@ void samsung_sync_wakemask(void __iomem *reg,
 			val |= mask->bit;
 	}
 
-	printk(KERN_INFO "wakemask %08x => %08x\n", __raw_readl(reg), val);
-	__raw_writel(val, reg);
+	printk(KERN_INFO "wakemask %08x => %08x\n", readl_relaxed(reg), val);
+	writel_relaxed(val, reg);
 }

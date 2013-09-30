@@ -26,6 +26,9 @@
 #include <mach/map.h>
 
 #include <plat/pm-common.h>
+#include <plat/regs-srom.h>
+
+#include <mach/map.h>
 
 #include "common.h"
 #include "exynos-pmu.h"
@@ -133,9 +136,9 @@ static void exynos_set_wakeupmask(long mask)
 
 static void exynos_cpu_set_boot_vector(long flags)
 {
-	__raw_writel(virt_to_phys(exynos_cpu_resume),
+	writel_relaxed(virt_to_phys(exynos_cpu_resume),
 		     exynos_boot_vector_addr());
-	__raw_writel(flags, exynos_boot_vector_flag());
+	writel_relaxed(flags, exynos_boot_vector_flag());
 }
 
 static int exynos_aftr_finisher(unsigned long flags)
@@ -221,7 +224,7 @@ static int exynos_cpu0_enter_aftr(void)
 			 * boot back up again, getting stuck in the
 			 * boot rom code
 			 */
-			if (__raw_readl(cpu_boot_reg_base()) == 0)
+			if (readl_relaxed(cpu_boot_reg_base()) == 0)
 				goto abort;
 
 			cpu_relax();
@@ -236,7 +239,7 @@ abort:
 		/*
 		 * Set the boot vector to something non-zero
 		 */
-		__raw_writel(virt_to_phys(exynos_cpu_resume),
+		writel_relaxed(virt_to_phys(exynos_cpu_resume),
 			     cpu_boot_reg_base());
 		dsb();
 
@@ -251,7 +254,7 @@ abort:
 			/*
 			 * Poke cpu1 out of the boot rom
 			 */
-			__raw_writel(virt_to_phys(exynos_cpu_resume),
+			writel_relaxed(virt_to_phys(exynos_cpu_resume),
 				     cpu_boot_reg_base());
 
 			arch_send_wakeup_ipi_mask(cpumask_of(1));
@@ -299,7 +302,7 @@ cpu1_aborted:
 
 static void exynos_pre_enter_aftr(void)
 {
-	__raw_writel(virt_to_phys(exynos_cpu_resume), cpu_boot_reg_base());
+	writel_relaxed(virt_to_phys(exynos_cpu_resume), cpu_boot_reg_base());
 }
 
 static void exynos_post_enter_aftr(void)

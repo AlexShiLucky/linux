@@ -194,9 +194,9 @@ static void exynos_mcpm_setup_entry_point(void)
 	 * mcpm_entry_point(). This is done during both secondary boot-up as
 	 * well as system resume.
 	 */
-	__raw_writel(0xe59f0000, ns_sram_base_addr);     /* ldr r0, [pc, #0] */
-	__raw_writel(0xe12fff10, ns_sram_base_addr + 4); /* bx  r0 */
-	__raw_writel(virt_to_phys(mcpm_entry_point), ns_sram_base_addr + 8);
+	writel_relaxed(0xe59f0000, ns_sram_base_addr);     /* ldr r0, [pc, #0] */
+	writel_relaxed(0xe12fff10, ns_sram_base_addr + 4); /* bx  r0 */
+	writel_relaxed(virt_to_phys(mcpm_entry_point), ns_sram_base_addr + 8);
 }
 
 static struct syscore_ops exynos_mcpm_syscore_ops = {
