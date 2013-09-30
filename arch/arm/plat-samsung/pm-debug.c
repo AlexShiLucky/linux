@@ -68,14 +68,14 @@ void s3c_pm_save_uarts(void)
 	void __iomem *regs = s3c_pm_uart_base();
 	struct pm_uart_save *save = &uart_save;
 
-	save->ulcon = __raw_readl(regs + S3C2410_ULCON);
-	save->ucon = __raw_readl(regs + S3C2410_UCON);
-	save->ufcon = __raw_readl(regs + S3C2410_UFCON);
-	save->umcon = __raw_readl(regs + S3C2410_UMCON);
-	save->ubrdiv = __raw_readl(regs + S3C2410_UBRDIV);
+	save->ulcon = readl_relaxed(regs + S3C2410_ULCON);
+	save->ucon = readl_relaxed(regs + S3C2410_UCON);
+	save->ufcon = readl_relaxed(regs + S3C2410_UFCON);
+	save->umcon = readl_relaxed(regs + S3C2410_UMCON);
+	save->ubrdiv = readl_relaxed(regs + S3C2410_UBRDIV);
 
 	if (!soc_is_s3c2410())
-		save->udivslot = __raw_readl(regs + S3C2443_DIVSLOT);
+		save->udivslot = readl_relaxed(regs + S3C2443_DIVSLOT);
 
 	S3C_PMDBG("UART[%p]: ULCON=%04x, UCON=%04x, UFCON=%04x, UBRDIV=%04x\n",
 		  regs, save->ulcon, save->ucon, save->ufcon, save->ubrdiv);
@@ -88,12 +88,12 @@ void s3c_pm_restore_uarts(void)
 
 	s3c_pm_arch_update_uart(regs, save);
 
-	__raw_writel(save->ulcon, regs + S3C2410_ULCON);
-	__raw_writel(save->ucon,  regs + S3C2410_UCON);
-	__raw_writel(save->ufcon, regs + S3C2410_UFCON);
-	__raw_writel(save->umcon, regs + S3C2410_UMCON);
-	__raw_writel(save->ubrdiv, regs + S3C2410_UBRDIV);
+	writel_relaxed(save->ulcon, regs + S3C2410_ULCON);
+	writel_relaxed(save->ucon,  regs + S3C2410_UCON);
+	writel_relaxed(save->ufcon, regs + S3C2410_UFCON);
+	writel_relaxed(save->umcon, regs + S3C2410_UMCON);
+	writel_relaxed(save->ubrdiv, regs + S3C2410_UBRDIV);
 
 	if (!soc_is_s3c2410())
-		__raw_writel(save->udivslot, regs + S3C2443_DIVSLOT);
+		writel_relaxed(save->udivslot, regs + S3C2443_DIVSLOT);
 }

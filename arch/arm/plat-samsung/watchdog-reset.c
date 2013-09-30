@@ -44,14 +44,14 @@ void samsung_wdt_reset(void)
 		clk_prepare_enable(wdt_clock);
 
 	/* disable watchdog, to be safe  */
-	__raw_writel(0, wdt_base + S3C2410_WTCON);
+	writel_relaxed(0, wdt_base + S3C2410_WTCON);
 
 	/* put initial values into count and data */
-	__raw_writel(0x80, wdt_base + S3C2410_WTCNT);
-	__raw_writel(0x80, wdt_base + S3C2410_WTDAT);
+	writel_relaxed(0x80, wdt_base + S3C2410_WTCNT);
+	writel_relaxed(0x80, wdt_base + S3C2410_WTDAT);
 
 	/* set the watchdog to go and reset... */
-	__raw_writel(S3C2410_WTCON_ENABLE | S3C2410_WTCON_DIV16 |
+	writel_relaxed(S3C2410_WTCON_ENABLE | S3C2410_WTCON_DIV16 |
 			S3C2410_WTCON_RSTEN | S3C2410_WTCON_PRESCALE(0x20),
 			wdt_base + S3C2410_WTCON);
 
