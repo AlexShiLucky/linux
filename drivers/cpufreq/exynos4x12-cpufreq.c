@@ -103,25 +103,26 @@ static struct apll_freq apll_freq_4412[] = {
 static void exynos4x12_set_clkdiv(unsigned int div_index)
 {
 	unsigned int tmp;
+	unsigned int stat_cpu1;
 
 	/* Change Divider - CPU0 */
 
 	tmp = apll_freq_4x12[div_index].clk_div_cpu0;
 
-	__raw_writel(tmp, cpufreq->cmu_regs + EXYNOS4_CLKDIV_CPU);
+	writel_relaxed(tmp, cpufreq->cmu_regs + EXYNOS4_CLKDIV_CPU);
 
-	while (__raw_readl(cpufreq->cmu_regs + EXYNOS4_CLKDIV_STATCPU)
+	while (readl_relaxed(cpufreq->cmu_regs + EXYNOS4_CLKDIV_STATCPU)
 	       & 0x11111111)
 		cpu_relax();
 
 	/* Change Divider - CPU1 */
 	tmp = apll_freq_4x12[div_index].clk_div_cpu1;
 
-	__raw_writel(tmp, cpufreq->cmu_regs + EXYNOS4_CLKDIV_CPU1);
+	writel_relaxed(tmp, cpufreq->cmu_regs + EXYNOS4_CLKDIV_CPU1);
 
 	do {
 		cpu_relax();
-		tmp = __raw_readl(cpufreq->cmu_regs + EXYNOS4_CLKDIV_STATCPU1);
+		tmp = readl_relaxed(cpufreq->cmu_regs + EXYNOS4_CLKDIV_STATCPU1);
 	} while (tmp != 0x0);
 }
 
@@ -134,7 +135,7 @@ static void exynos4x12_set_apll(unsigned int index)
 
 	do {
 		cpu_relax();
-		tmp = (__raw_readl(cpufreq->cmu_regs + EXYNOS4_CLKMUX_STATCPU)
+		tmp = (readl_relaxed(cpufreq->cmu_regs + EXYNOS4_CLKMUX_STATCPU)
 			>> EXYNOS4_CLKSRC_CPU_MUXCORE_SHIFT);
 		tmp &= 0x7;
 	} while (tmp != 0x2);
@@ -146,7 +147,7 @@ static void exynos4x12_set_apll(unsigned int index)
 
 	do {
 		cpu_relax();
-		tmp = __raw_readl(cpufreq->cmu_regs + EXYNOS4_CLKMUX_STATCPU);
+		tmp = readl_relaxed(cpufreq->cmu_regs + EXYNOS4_CLKMUX_STATCPU);
 		tmp &= EXYNOS4_CLKMUX_STATCPU_MUXCORE_MASK;
 	} while (tmp != (0x1 << EXYNOS4_CLKSRC_CPU_MUXCORE_SHIFT));
 }
