@@ -194,8 +194,8 @@ static void exynos_set_wakeupmask(long mask)
 
 static void exynos_cpu_set_boot_vector(long flags)
 {
-	__raw_writel(virt_to_phys(exynos_cpu_resume), EXYNOS_BOOT_VECTOR_ADDR);
-	__raw_writel(flags, EXYNOS_BOOT_VECTOR_FLAG);
+	writel_relaxed(virt_to_phys(exynos_cpu_resume), EXYNOS_BOOT_VECTOR_ADDR);
+	writel_relaxed(flags, EXYNOS_BOOT_VECTOR_FLAG);
 }
 
 static int exynos_aftr_finisher(unsigned long flags)

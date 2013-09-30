@@ -392,9 +392,9 @@ static int __init exynos_mcpm_init(void)
 	 * as part of secondary_cpu_start().  Let's redirect it to the
 	 * mcpm_entry_point().
 	 */
-	__raw_writel(0xe59f0000, ns_sram_base_addr);     /* ldr r0, [pc, #0] */
-	__raw_writel(0xe12fff10, ns_sram_base_addr + 4); /* bx  r0 */
-	__raw_writel(virt_to_phys(mcpm_entry_point), ns_sram_base_addr + 8);
+	writel_relaxed(0xe59f0000, ns_sram_base_addr);     /* ldr r0, [pc, #0] */
+	writel_relaxed(0xe12fff10, ns_sram_base_addr + 4); /* bx  r0 */
+	writel_relaxed(virt_to_phys(mcpm_entry_point), ns_sram_base_addr + 8);
 
 	iounmap(ns_sram_base_addr);
 

@@ -806,7 +806,7 @@ static void __init exynos5250_clk_init(struct device_node *np)
 		PWR_CTRL1_DIV2_DOWN_EN | PWR_CTRL1_DIV1_DOWN_EN |
 		PWR_CTRL1_USE_CORE1_WFE | PWR_CTRL1_USE_CORE0_WFE |
 		PWR_CTRL1_USE_CORE1_WFI | PWR_CTRL1_USE_CORE0_WFI);
-	__raw_writel(tmp, reg_base + PWR_CTRL1);
+	writel_relaxed(tmp, reg_base + PWR_CTRL1);
 
 	/*
 	 * Enable arm clock up (on exiting idle). Set arm divider
@@ -816,7 +816,7 @@ static void __init exynos5250_clk_init(struct device_node *np)
 	tmp = (PWR_CTRL2_DIV2_UP_EN | PWR_CTRL2_DIV1_UP_EN |
 		PWR_CTRL2_DUR_STANDBY2_VAL | PWR_CTRL2_DUR_STANDBY1_VAL |
 		PWR_CTRL2_CORE2_UP_RATIO | PWR_CTRL2_CORE1_UP_RATIO);
-	__raw_writel(tmp, reg_base + PWR_CTRL2);
+	writel_relaxed(tmp, reg_base + PWR_CTRL2);
 
 	exynos5250_clk_sleep_init();
 
