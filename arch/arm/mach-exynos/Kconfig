@@ -44,6 +44,8 @@ config ARCH_EXYNOS4
 	select CPU_EXYNOS4210
 	select GIC_NON_BANKED
 	select KEYBOARD_SAMSUNG if INPUT_KEYBOARD
+	select HAVE_ARM_SCU if SMP
+	select HAVE_SMP
 	select MIGHT_HAVE_CACHE_L2X0
 	help
 	  Samsung EXYNOS4 (Cortex-A9) SoC based systems
@@ -51,6 +53,10 @@ config ARCH_EXYNOS4
 config ARCH_EXYNOS5
 	bool "SAMSUNG EXYNOS5"
 	default y
+	select ARCH_SUPPORTS_BIG_ENDIAN
+	select CLKSRC_OF
+	select HAVE_SMP
+	select USB_ARCH_HAS_XHCI
 	help
 	  Samsung EXYNOS5 (Cortex-A15/A7) SoC based systems
 
@@ -100,6 +106,8 @@ config SOC_EXYNOS5420
 	bool "SAMSUNG EXYNOS5420"
 	default y
 	depends on ARCH_EXYNOS5
+	select S5P_PM if PM
+	select S5P_SLEEP if PM
 
 config SOC_EXYNOS5440
 	bool "SAMSUNG EXYNOS5440"
