@@ -85,6 +85,42 @@ static void dbg(const char *fmt, ...)
 #define S3C24XX_TX_DMA			2
 #define S3C24XX_RX_PIO			1
 #define S3C24XX_RX_DMA			2
+
+#ifndef CONFIG_CPU_BIG_ENDIAN /* little endian */
+static inline void __hw_set_bit(int nr, volatile unsigned long *addr)
+{
+	__set_bit(nr, addr);
+}
+
+static inline void __hw_clear_bit(int nr, volatile unsigned long *addr)
+{
+	__clear_bit(nr, addr);
+}
+#else
+static inline void __hw_set_bit(int nr, volatile unsigned long *addr)
+{
+	unsigned long mask = BIT_MASK(nr);
+	unsigned long *p = ((unsigned long *)addr) + BIT_WORD(nr);
+	unsigned long val = le32_to_cpu(*p);
+
+	val  |= mask;
+
+	*p = cpu_to_le32(val);
+}
+
+static inline void __hw_clear_bit(int nr, volatile unsigned long *addr)
+{
+	unsigned long mask = BIT_MASK(nr);
+	unsigned long *p = ((unsigned long *)addr) + BIT_WORD(nr);
+
+	unsigned long val = le32_to_cpu(*p);
+
+	val &= ~mask;
+
+	*p = cpu_to_le32(val);
+}
+#endif
+
 /* macros to change one thing to another */
 
 #define tx_enabled(port) ((port)->unused[0])
@@ -170,7 +206,7 @@ static void s3c24xx_serial_stop_tx(struct uart_port *port)
 		return;
 
 	if (s3c24xx_serial_has_interrupt_mask(port))
-		__set_bit(S3C64XX_UINTM_TXD,
+		__hw_set_bit(S3C64XX_UINTM_TXD,
 			portaddrl(port, S3C64XX_UINTM));
 	else
 		disable_irq_nosync(ourport->tx_irq);
@@ -236,7 +272,7 @@ static void enable_tx_dma(struct s3c24xx_uart_port *ourport)
 
 	/* Mask Tx interrupt */
 	if (s3c24xx_serial_has_interrupt_mask(port))
-		__set_bit(S3C64XX_UINTM_TXD,
+		__hw_set_bit(S3C64XX_UINTM_TXD,
 			  portaddrl(port, S3C64XX_UINTM));
 	else
 		disable_irq_nosync(ourport->tx_irq);
@@ -270,7 +306,7 @@ static void enable_tx_pio(struct s3c24xx_uart_port *ourport)
 
 	/* Unmask Tx interrupt */
 	if (s3c24xx_serial_has_interrupt_mask(port))
-		__clear_bit(S3C64XX_UINTM_TXD,
+		__hw_clear_bit(S3C64XX_UINTM_TXD,
 			    portaddrl(port, S3C64XX_UINTM));
 	else
 		enable_irq(ourport->tx_irq);
@@ -431,7 +467,7 @@ static void s3c24xx_serial_stop_rx(struct uart_port *port)
 	if (rx_enabled(port)) {
 		dbg("s3c24xx_serial_stop_rx: port=%p\n", port);
 		if (s3c24xx_serial_has_interrupt_mask(port))
-			__set_bit(S3C64XX_UINTM_RXD,
+			__hw_set_bit(S3C64XX_UINTM_RXD,
 				portaddrl(port, S3C64XX_UINTM));
 		else
 			disable_irq_nosync(ourport->rx_irq);
@@ -784,7 +820,7 @@ static irqreturn_t s3c24xx_serial_tx_chars(int irq, void *id)
 	if (uart_circ_empty(xmit))
 		s3c24xx_serial_stop_tx(port);
 
-out:
+ out:
 	spin_unlock_irqrestore(&port->lock, flags);
 	return IRQ_HANDLED;
 }
@@ -1078,7 +1114,7 @@ static int s3c64xx_serial_startup(struct uart_port *port)
 	spin_unlock_irqrestore(&port->lock, flags);
 
 	/* Enable Rx Interrupt */
-	__clear_bit(S3C64XX_UINTM_RXD, portaddrl(port, S3C64XX_UINTM));
+	__hw_clear_bit(S3C64XX_UINTM_RXD, portaddrl(port, S3C64XX_UINTM));
 
 	dbg("s3c64xx_serial_startup ok\n");
 	return ret;
