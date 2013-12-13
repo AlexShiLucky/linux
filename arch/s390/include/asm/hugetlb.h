@@ -112,4 +112,19 @@ static inline pte_t huge_pte_modify(pte_t pte, pgprot_t newprot)
 	return pte_modify(pte, newprot);
 }
 
+static inline struct page *huge_pte_page(pte_t pte)
+{
+	return pte_page(pte);
+}
+
+static inline unsigned long huge_pte_present(pte_t pte)
+{
+	return pte_present(pte);
+}
+
+static inline pte_t huge_pte_mkyoung(pte_t pte)
+{
+	return pte_mkyoung(pte);
+}
+
 #endif /* _ASM_S390_HUGETLB_H */
