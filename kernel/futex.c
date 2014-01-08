@@ -286,8 +286,8 @@ again:
 	if (unlikely(PageTail(page))) {
 		put_page(page);
 		/* serialize against __split_huge_page_splitting() */
-		arch_block_thp_split(mm);
-		if (likely(__get_user_pages_fast(address, 1, 1, &page) == 1)) {
+		local_irq_disable();
+		if (likely(__get_user_pages_fast(address, 1, !ro, &page) == 1)) {
 			page_head = compound_head(page);
 			/*
 			 * page_head is valid pointer but we must pin
