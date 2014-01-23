@@ -15,6 +15,13 @@
 
 #ifdef CONFIG_CPUSETS
 
+extern cpumask_var_t cpuset_quiesced_cpus_mask;
+
+static inline bool cpu_quiesced(int cpu)
+{
+	return cpumask_test_cpu(cpu, cpuset_quiesced_cpus_mask);
+}
+
 extern int number_of_cpusets;	/* How many cpusets are defined in system? */
 
 extern int cpuset_init(void);
@@ -123,6 +130,7 @@ static inline void set_mems_allowed(nodemask_t nodemask)
 
 #else /* !CONFIG_CPUSETS */
 
+static inline bool cpu_quiesced(int cpu) { return 0; }
 static inline int cpuset_init(void) { return 0; }
 static inline void cpuset_init_smp(void) {}
 
