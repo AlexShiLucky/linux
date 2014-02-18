@@ -218,6 +218,9 @@ static inline void
 tlb_remove_pmd_tlb_entry(struct mmu_gather *tlb, pmd_t *pmdp, unsigned long addr)
 {
 	tlb_add_flush(tlb, addr);
+#ifndef CONFIG_ARM_LPAE
+	tlb_add_flush(tlb, addr + SZ_1M);
+#endif
 }
 
 #define pte_free_tlb(tlb, ptep, addr)	__pte_free_tlb(tlb, ptep, addr)

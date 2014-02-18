@@ -211,6 +211,7 @@ static inline pmd_t *pmd_offset(pud_t *pud, unsigned long addr)
  */
 #define PMD_DSECT_DIRTY		(_AT(pmdval_t, 1) << 5)
 #define PMD_DSECT_AF		(_AT(pmdval_t, 1) << 6)
+#define PMD_DSECT_SPLITTING	(_AT(pmdval_t, 1) << 7)
 
 #define PMD_BIT_FUNC(fn,op) \
 static inline pmd_t pmd_##fn(pmd_t pmd) { pmd_val(pmd) op; return pmd; }
@@ -231,6 +232,16 @@ extern pgprot_t get_huge_pgprot(pgprot_t newprot);
 
 #define pfn_pmd(pfn,prot) __pmd(__pfn_to_phys(pfn) | pgprot_val(prot));
 #define mk_pmd(page,prot) pfn_pmd(page_to_pfn(page),get_huge_pgprot(prot));
+#define pmd_mkhuge(pmd)	(pmd)
+
+#ifdef CONFIG_TRANSPARENT_HUGEPAGE
+#define pmd_trans_splitting(pmd)       (pmd_val(pmd) & PMD_DSECT_SPLITTING)
+#define pmd_trans_huge(pmd)            (pmd_thp_or_huge(pmd))
+#else
+static inline int pmd_trans_huge(pmd_t pmd);
+#endif
+
+#define pmd_mknotpresent(pmd)  (__pmd(0))
 
 PMD_BIT_FUNC(mkdirty, |= PMD_DSECT_DIRTY);
 PMD_BIT_FUNC(mkwrite, |= PMD_SECT_AP_WRITE);
@@ -238,6 +249,8 @@ PMD_BIT_FUNC(wrprotect,	&= ~PMD_SECT_AP_WRITE);
 PMD_BIT_FUNC(mknexec,	|= PMD_SECT_XN);
 PMD_BIT_FUNC(rmprotnone, |= PMD_TYPE_SECT);
 PMD_BIT_FUNC(mkyoung, |= PMD_DSECT_AF);
+PMD_BIT_FUNC(mkold, &= ~PMD_DSECT_AF);
+PMD_BIT_FUNC(mksplitting, |= PMD_DSECT_SPLITTING);
 
 #define pmd_young(pmd)			(pmd_val(pmd) & PMD_DSECT_AF)
 #define pmd_write(pmd)			(pmd_val(pmd) & PMD_SECT_AP_WRITE)
@@ -276,6 +289,25 @@ static inline pmd_t pmd_modify(pmd_t pmd, pgprot_t newprot)
 	pmd_val(pmd) = (pmd_val(pmd) & ~mask) | (pgprot_val(hugeprot) & mask);
 
 	return pmd;
+}
+
+static inline int has_transparent_hugepage(void)
+{
+	return 1;
+}
+
+static inline struct page *pmd_page(pmd_t pmd)
+{
+	/*
+	 * for a section, we need to mask off more of the pmd
+	 * before looking up the page as it is a section descriptor.
+	 *
+	 * pmd_page only gets sections from the thp code.
+	 */
+	if (pmd_trans_huge(pmd))
+		return (phys_to_page(pmd_val(pmd) & HPAGE_MASK));
+
+	return phys_to_page(pmd_val(pmd) & PHYS_MASK);
 }
 
 #endif /* __ASSEMBLY__ */
