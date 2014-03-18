@@ -777,7 +777,7 @@ __mod_timer(struct timer_list *timer, unsigned long expires,
 
 #if defined(CONFIG_NO_HZ_COMMON) && defined(CONFIG_SMP)
 	if (!pinned && get_sysctl_timer_migration() && idle_cpu(cpu))
-		cpu = get_nohz_timer_target();
+		cpu = get_nohz_timer_target(pinned);
 #endif
 	preempt_enable_rt();
 
@@ -1407,6 +1407,7 @@ unsigned long get_next_timer_interrupt(unsigned long now)
 
 	if (time_before_eq(expires, now))
 		return now;
+
 	return cmp_next_hrtimer_event(now, expires);
 }
 #endif
