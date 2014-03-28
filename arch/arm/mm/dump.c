@@ -58,10 +58,10 @@ static const struct prot_bits pte_bits[] = {
 		.set	= "USR",
 		.clear	= "   ",
 	}, {
-		.mask	= L_PTE_RDONLY,
-		.val	= L_PTE_RDONLY,
-		.set	= "ro",
-		.clear	= "RW",
+		.mask	= L_PTE_WRITE,
+		.val	= L_PTE_WRITE,
+		.set	= "RW",
+		.clear	= "ro",
 	}, {
 		.mask	= L_PTE_XN,
 		.val	= L_PTE_XN,

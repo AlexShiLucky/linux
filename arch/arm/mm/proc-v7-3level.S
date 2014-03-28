@@ -78,7 +78,9 @@ ENTRY(cpu_v7_set_pte_ext)
 	tst	r3, #1 << (57 - 32)		@ L_PTE_NONE
 	bicne	r2, #L_PTE_VALID
 	bne	1f
-	tst	r3, #1 << (55 - 32)		@ L_PTE_DIRTY
+	bic	r2, #L_PTE_RDONLY
+	tst	r3, #1 << (58 - 32)		@ L_PTE_WRITE
+	tstne	r3, #1 << (55 - 32)		@ L_PTE_DIRTY
 	orreq	r2, #L_PTE_RDONLY
 1:	strd	r2, r3, [r0]
 	ALT_SMP(W(nop))
