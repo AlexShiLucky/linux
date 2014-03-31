@@ -693,13 +693,15 @@ int get_nohz_timer_target(int pinned)
 
 	preempt_disable_rt();
 	cpu = smp_processor_id();
-	if (pinned || !get_sysctl_timer_migration() || !idle_cpu(cpu))
+	if (pinned || !get_sysctl_timer_migration() ||
+	    !(idle_cpu(cpu) || cpu_quiesced(cpu)))
 		goto preempt_en_rt;
 
 	rcu_read_lock();
 	for_each_domain(cpu, sd) {
 		for_each_cpu(i, sched_domain_span(sd)) {
-			if (!idle_cpu(i)) {
+			/* Don't push timers to quiesced CPUs */
+			if (!(cpu_quiesced(i) || idle_cpu(i))) {
 				cpu = i;
 				goto unlock;
 			}
