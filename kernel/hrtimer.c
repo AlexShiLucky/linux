@@ -1958,16 +1958,21 @@ static void init_hrtimers_cpu(int cpu)
 #endif
 }
 
-#ifdef CONFIG_HOTPLUG_CPU
-
+#if defined(CONFIG_HOTPLUG_CPU) || defined(CONFIG_CPUSETS)
 static void migrate_hrtimer_list(struct hrtimer_clock_base *old_base,
-				struct hrtimer_clock_base *new_base)
+				struct hrtimer_clock_base *new_base,
+				bool remove_pinned)
 {
 	struct hrtimer *timer;
 	struct timerqueue_node *node;
+	struct timerqueue_head pinned;
+	int is_pinned;
+
+	timerqueue_init_head(&pinned);
 
 	while ((node = timerqueue_getnext(&old_base->active))) {
 		timer = container_of(node, struct hrtimer, node);
+
 		BUG_ON(hrtimer_callback_running(timer));
 		debug_deactivate(timer);
 
@@ -1977,6 +1982,13 @@ static void migrate_hrtimer_list(struct hrtimer_clock_base *old_base,
 		 * under us on another CPU
 		 */
 		__remove_hrtimer(timer, old_base, HRTIMER_STATE_MIGRATE, 0);
+
+		is_pinned = timer->state & HRTIMER_STATE_PINNED;
+		if (!remove_pinned && is_pinned) {
+			timerqueue_add(&pinned, &timer->node);
+			continue;
+		}
+
 		timer->base = new_base;
 		/*
 		 * Enqueue the timers on the new cpu. This does not
@@ -1991,17 +2003,24 @@ static void migrate_hrtimer_list(struct hrtimer_clock_base *old_base,
 		/* Clear the migration state bit */
 		timer->state &= ~HRTIMER_STATE_MIGRATE;
 	}
+
+	/* Re-queue pinned timers for non-hotplug usecase */
+	while ((node = timerqueue_getnext(&pinned))) {
+		timer = container_of(node, struct hrtimer, node);
+
+		timerqueue_del(&pinned, &timer->node);
+		enqueue_hrtimer(timer, old_base);
+		timer->state &= ~HRTIMER_STATE_MIGRATE;
+	}
 }
 
-static void migrate_hrtimers(int scpu)
+static void __migrate_hrtimers(int scpu, bool remove_pinned)
 {
 	struct hrtimer_cpu_base *old_base, *new_base;
+	unsigned long flags;
 	int i;
 
-	BUG_ON(cpu_online(scpu));
-	tick_cancel_sched_timer(scpu);
-
-	local_irq_disable();
+	local_irq_save(flags);
 	old_base = &per_cpu(hrtimer_bases, scpu);
 	new_base = &__get_cpu_var(hrtimer_bases);
 	/*
@@ -2013,7 +2032,7 @@ static void migrate_hrtimers(int scpu)
 
 	for (i = 0; i < HRTIMER_MAX_CLOCK_BASES; i++) {
 		migrate_hrtimer_list(&old_base->clock_base[i],
-				     &new_base->clock_base[i]);
+				     &new_base->clock_base[i], remove_pinned);
 	}
 
 	raw_spin_unlock(&old_base->lock);
@@ -2021,10 +2040,26 @@ static void migrate_hrtimers(int scpu)
 
 	/* Check, if we got expired work to do */
 	__hrtimer_peek_ahead_timers();
-	local_irq_enable();
+	local_irq_restore(flags);
 }
+#endif /* CONFIG_HOTPLUG_CPU || CONFIG_CPUSETS */
 
+#ifdef CONFIG_HOTPLUG_CPU
+static void migrate_hrtimers(int scpu)
+{
+	BUG_ON(cpu_online(scpu));
+	tick_cancel_sched_timer(scpu);
+
+	__migrate_hrtimers(scpu, true);
+}
 #endif /* CONFIG_HOTPLUG_CPU */
+
+#ifdef CONFIG_CPUSETS
+void hrtimer_quiesce_cpu(void *cpup)
+{
+	__migrate_hrtimers(*(int *)cpup, false);
+}
+#endif /* CONFIG_CPUSETS */
 
 static int hrtimer_cpu_notify(struct notifier_block *self,
 					unsigned long action, void *hcpu)
