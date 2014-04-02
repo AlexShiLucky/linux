@@ -1030,7 +1030,11 @@ static void __remove_hrtimer(struct hrtimer *timer,
 	if (!timerqueue_getnext(&base->active))
 		base->cpu_base->active_bases &= ~(1 << base->index);
 out:
-	timer->state = newstate;
+	/*
+	 * We need to preserve PINNED state here, otherwise we may end up
+	 * migrating pinned hrtimers as well.
+	 */
+	timer->state = newstate | (timer->state & HRTIMER_STATE_PINNED);
 }
 
 /*
@@ -1110,6 +1114,10 @@ int __hrtimer_start_range_ns(struct hrtimer *timer, ktime_t tim,
 			timer->praecox = ktime_set(0, 0);
 	}
 #endif
+
+	/* Update pinned state */
+	timer->state &= ~HRTIMER_STATE_PINNED;
+	timer->state |= !!(mode & HRTIMER_MODE_PINNED) << HRTIMER_PINNED_SHIFT;
 
 	leftmost = enqueue_hrtimer(timer, new_base);
 
@@ -1383,7 +1391,7 @@ static void __run_hrtimer(struct hrtimer *timer, ktime_t *now)
 	 * hrtimer_start_range_ns() or in hrtimer_interrupt()
 	 */
 	if (restart != HRTIMER_NORESTART) {
-		BUG_ON(timer->state != HRTIMER_STATE_CALLBACK);
+		BUG_ON(!(timer->state & HRTIMER_STATE_CALLBACK));
 		enqueue_hrtimer(timer, base);
 	}
 
@@ -2060,7 +2068,9 @@ void __init hrtimers_init(void)
 	hrtimer_cpu_notify(&hrtimers_nb, (unsigned long)CPU_UP_PREPARE,
 			  (void *)(long)smp_processor_id());
 	register_cpu_notifier(&hrtimers_nb);
+#ifdef CONFIG_HIGH_RES_TIMERS
 	open_softirq(HRTIMER_SOFTIRQ, run_hrtimer_softirq);
+#endif
 }
 
 /**
