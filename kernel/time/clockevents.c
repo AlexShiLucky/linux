@@ -105,14 +105,10 @@ void clockevents_set_mode(struct clock_event_device *dev,
 				 enum clock_event_mode mode)
 {
 	if (dev->mode != mode) {
-		if (dev->set_dev_mode) {
-			int ret = dev->set_dev_mode(mode, dev);
+		int ret = dev->set_dev_mode(mode, dev);
 
-			/* Currently available modes shouldn't fail */
-			WARN_ONCE(ret, "Requested mode: %d, error: %d\n", mode, ret);
-		} else {
-			dev->set_mode(mode, dev);
-		}
+		/* Currently available modes shouldn't fail */
+		WARN_ONCE(ret, "Requested mode: %d, error: %d\n", mode, ret);
 
 		dev->mode = mode;
 

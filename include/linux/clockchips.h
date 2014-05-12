@@ -77,7 +77,6 @@ enum clock_event_mode {
  * @features:		features
  * @retries:		number of forced programming retries
  * @set_dev_mode:	set dev mode function
- * @set_mode:		set mode function (deprecated, use set_dev_mode instead)
  * @broadcast:		function to broadcast events
  * @min_delta_ticks:	minimum delta value in ticks stored for reconfiguration
  * @max_delta_ticks:	maximum delta value in ticks stored for reconfiguration
@@ -105,8 +104,6 @@ struct clock_event_device {
 
 	void			(*broadcast)(const struct cpumask *mask);
 	int			(*set_dev_mode)(enum clock_event_mode mode,
-					    struct clock_event_device *);
-	void			(*set_mode)(enum clock_event_mode mode,
 					    struct clock_event_device *);
 	void			(*suspend)(struct clock_event_device *);
 	void			(*resume)(struct clock_event_device *);

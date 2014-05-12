@@ -229,10 +229,7 @@ print_tickdevice(struct seq_file *m, struct tick_device *td, int cpu)
 	SEQ_printf(m, "\n");
 
 	SEQ_printf(m, " set_mode:       ");
-	if (dev->set_dev_mode)
-		print_name_offset(m, dev->set_dev_mode);
-	else
-		print_name_offset(m, dev->set_mode);
+	print_name_offset(m, dev->set_dev_mode);
 	SEQ_printf(m, "\n");
 
 	SEQ_printf(m, " event_handler:  ");
