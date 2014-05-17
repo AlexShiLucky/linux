@@ -55,7 +55,7 @@ static int score_timer_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void score_timer_set_mode(enum clock_event_mode mode,
+static int score_timer_set_mode(enum clock_event_mode mode,
 		struct clock_event_device *evdev)
 {
 	switch (mode) {
@@ -70,8 +70,9 @@ static void score_timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_UNUSED:
 		break;
 	default:
-		BUG();
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device score_clockevent = {
@@ -79,7 +80,7 @@ static struct clock_event_device score_clockevent = {
 	.features	= CLOCK_EVT_FEAT_PERIODIC,
 	.shift		= 16,
 	.set_next_event	= score_timer_set_next_event,
-	.set_mode	= score_timer_set_mode,
+	.set_dev_mode	= score_timer_set_mode,
 };
 
 void __init time_init(void)

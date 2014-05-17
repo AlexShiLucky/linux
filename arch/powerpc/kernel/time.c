@@ -97,7 +97,7 @@ static struct clocksource clocksource_timebase = {
 
 static int decrementer_set_next_event(unsigned long evt,
 				      struct clock_event_device *dev);
-static void decrementer_set_mode(enum clock_event_mode mode,
+static int decrementer_set_mode(enum clock_event_mode mode,
 				 struct clock_event_device *dev);
 
 struct clock_event_device decrementer_clockevent = {
@@ -105,7 +105,7 @@ struct clock_event_device decrementer_clockevent = {
 	.rating         = 200,
 	.irq            = 0,
 	.set_next_event = decrementer_set_next_event,
-	.set_mode       = decrementer_set_mode,
+	.set_dev_mode   = decrementer_set_mode,
 	.features       = CLOCK_EVT_FEAT_ONESHOT,
 };
 EXPORT_SYMBOL(decrementer_clockevent);
@@ -818,8 +818,20 @@ static int decrementer_set_next_event(unsigned long evt,
 static void decrementer_set_mode(enum clock_event_mode mode,
 				 struct clock_event_device *dev)
 {
-	if (mode != CLOCK_EVT_MODE_ONESHOT)
+	int ret = 0;
+
+	switch (mode) {
+	default:
+		ret = -ENOSYS;
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 		decrementer_set_next_event(DECREMENTER_MAX, dev);
+		break;
+	case CLOCK_EVT_MODE_ONESHOT:
+		break;
+	}
+	return ret;
 }
 
 static void register_decrementer_clockevent(int cpu)

@@ -42,7 +42,7 @@ static u32 pit_cnt;
  * This is also called after resume to bring the PIT into operation again.
  */
 
-static void init_cf_pit_timer(enum clock_event_mode mode,
+static int init_cf_pit_timer(enum clock_event_mode mode,
                              struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -72,7 +72,10 @@ static void init_cf_pit_timer(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		/* Nothing to do here */
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 /*
@@ -90,7 +93,7 @@ static int cf_pit_next_event(unsigned long delta,
 struct clock_event_device cf_pit_clockevent = {
 	.name		= "pit",
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= init_cf_pit_timer,
+	.set_dev_mode	= init_cf_pit_timer,
 	.set_next_event	= cf_pit_next_event,
 	.shift		= 32,
 	.irq		= MCF_IRQ_PIT1,

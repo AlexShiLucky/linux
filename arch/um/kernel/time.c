@@ -22,7 +22,7 @@ void timer_handler(int sig, struct siginfo *unused_si, struct uml_pt_regs *regs)
 	local_irq_restore(flags);
 }
 
-static void itimer_set_mode(enum clock_event_mode mode,
+static int itimer_set_mode(enum clock_event_mode mode,
 			    struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -38,7 +38,10 @@ static void itimer_set_mode(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int itimer_next_event(unsigned long delta,
@@ -52,7 +55,7 @@ static struct clock_event_device itimer_clockevent = {
 	.rating		= 250,
 	.cpumask	= cpu_all_mask,
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= itimer_set_mode,
+	.set_dev_mode	= itimer_set_mode,
 	.set_next_event = itimer_next_event,
 	.shift		= 32,
 	.irq		= 0,

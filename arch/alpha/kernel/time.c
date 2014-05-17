@@ -104,11 +104,22 @@ rtc_timer_interrupt(int irq, void *dev)
 	return IRQ_HANDLED;
 }
 
-static void
+static int
 rtc_ce_set_mode(enum clock_event_mode mode, struct clock_event_device *ce)
 {
 	/* The mode member of CE is updated in generic code.
 	   Since we only support periodic events, nothing to do.  */
+	switch (mode) {
+	case CLOCK_EVT_MODE_PERIODIC:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
+		break;
+
+	default:
+		return -ENOSYS;
+	}
+	return 0;
 }
 
 static int
@@ -129,7 +140,7 @@ init_rtc_clockevent(void)
 		.features = CLOCK_EVT_FEAT_PERIODIC,
 		.rating = 100,
 		.cpumask = cpumask_of(cpu),
-		.set_mode = rtc_ce_set_mode,
+		.set_dev_mode = rtc_ce_set_mode,
 		.set_next_event = rtc_ce_set_next_event,
 	};
 
@@ -161,12 +172,24 @@ static struct clocksource qemu_cs = {
  * The QEMU alarm as a clock_event_device primitive.
  */
 
-static void
+static int
 qemu_ce_set_mode(enum clock_event_mode mode, struct clock_event_device *ce)
 {
 	/* The mode member of CE is updated for us in generic code.
 	   Just make sure that the event is disabled.  */
 	qemu_set_alarm_abs(0);
+
+	switch (mode) {
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
+		break;
+
+	default:
+		return -ENOSYS;
+	}
+	return 0;
 }
 
 static int
@@ -197,7 +220,7 @@ init_qemu_clockevent(void)
 		.features = CLOCK_EVT_FEAT_ONESHOT,
 		.rating = 400,
 		.cpumask = cpumask_of(cpu),
-		.set_mode = qemu_ce_set_mode,
+		.set_dev_mode = qemu_ce_set_mode,
 		.set_next_event = qemu_ce_set_next_event,
 	};
 

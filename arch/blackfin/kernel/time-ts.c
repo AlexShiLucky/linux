@@ -136,7 +136,7 @@ static int bfin_gptmr0_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void bfin_gptmr0_set_mode(enum clock_event_mode mode,
+static int bfin_gptmr0_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -173,7 +173,10 @@ static void bfin_gptmr0_set_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static void bfin_gptmr0_ack(void)
@@ -217,7 +220,7 @@ static struct clock_event_device clockevent_gptmr0 = {
 	.shift		= 32,
 	.features 	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.set_next_event = bfin_gptmr0_set_next_event,
-	.set_mode	= bfin_gptmr0_set_mode,
+	.set_dev_mode	= bfin_gptmr0_set_mode,
 };
 
 static void __init bfin_gptmr0_clockevent_init(struct clock_event_device *evt)
@@ -250,7 +253,7 @@ static int bfin_coretmr_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void bfin_coretmr_set_mode(enum clock_event_mode mode,
+static int bfin_coretmr_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -279,7 +282,10 @@ static void bfin_coretmr_set_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 void bfin_coretmr_init(void)
@@ -335,7 +341,7 @@ void bfin_coretmr_clockevent_init(void)
 	evt->shift = 32;
 	evt->features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT;
 	evt->set_next_event = bfin_coretmr_set_next_event;
-	evt->set_mode = bfin_coretmr_set_mode;
+	evt->set_dev_mode = bfin_coretmr_set_mode;
 
 	clock_tick = get_cclk() / TIME_SCALE;
 	evt->mult = div_sc(clock_tick, NSEC_PER_SEC, evt->shift);

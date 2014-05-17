@@ -80,7 +80,7 @@ static int comparator_next_event(unsigned long delta,
 	return 0;
 }
 
-static void comparator_mode(enum clock_event_mode mode,
+static int comparator_mode(enum clock_event_mode mode,
 		struct clock_event_device *evdev)
 {
 	switch (mode) {
@@ -108,8 +108,9 @@ static void comparator_mode(enum clock_event_mode mode,
 		}
 		break;
 	default:
-		BUG();
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device comparator = {
@@ -118,7 +119,7 @@ static struct clock_event_device comparator = {
 	.shift		= 16,
 	.rating		= 50,
 	.set_next_event	= comparator_next_event,
-	.set_mode	= comparator_mode,
+	.set_dev_mode	= comparator_mode,
 };
 
 void read_persistent_clock(struct timespec *ts)

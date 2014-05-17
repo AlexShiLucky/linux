@@ -126,7 +126,7 @@ static int next_event(unsigned long delta,
 	return 0;
 }
 
-static void set_clock_mode(enum clock_event_mode mode,
+static int set_clock_mode(enum clock_event_mode mode,
 			   struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -146,14 +146,17 @@ static void set_clock_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device t64_clockevent_device = {
 	.name		= "TIMER64_EVT32_TIMER",
 	.features	= CLOCK_EVT_FEAT_ONESHOT | CLOCK_EVT_FEAT_PERIODIC,
 	.rating		= 200,
-	.set_mode	= set_clock_mode,
+	.set_dev_mode	= set_clock_mode,
 	.set_next_event	= next_event,
 };
 
