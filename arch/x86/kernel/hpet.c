@@ -228,7 +228,7 @@ static void hpet_reserve_platform_timers(unsigned int id) { }
  */
 static unsigned long hpet_freq;
 
-static void hpet_legacy_set_mode(enum clock_event_mode mode,
+static int hpet_legacy_set_mode(enum clock_event_mode mode,
 			  struct clock_event_device *evt);
 static int hpet_legacy_next_event(unsigned long delta,
 			   struct clock_event_device *evt);
@@ -239,7 +239,7 @@ static int hpet_legacy_next_event(unsigned long delta,
 static struct clock_event_device hpet_clockevent = {
 	.name		= "hpet",
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= hpet_legacy_set_mode,
+	.set_dev_mode	= hpet_legacy_set_mode,
 	.set_next_event = hpet_legacy_next_event,
 	.irq		= 0,
 	.rating		= 50,
@@ -310,7 +310,7 @@ static void hpet_legacy_clockevent_register(void)
 
 static int hpet_setup_msi_irq(unsigned int irq);
 
-static void hpet_set_mode(enum clock_event_mode mode,
+static int hpet_set_mode(enum clock_event_mode mode,
 			  struct clock_event_device *evt, int timer)
 {
 	unsigned int cfg, cmp, now;
@@ -367,7 +367,10 @@ static void hpet_set_mode(enum clock_event_mode mode,
 		}
 		hpet_print_config();
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int hpet_next_event(unsigned long delta,
@@ -407,10 +410,10 @@ static int hpet_next_event(unsigned long delta,
 	return res < HPET_MIN_CYCLES ? -ETIME : 0;
 }
 
-static void hpet_legacy_set_mode(enum clock_event_mode mode,
+static int hpet_legacy_set_mode(enum clock_event_mode mode,
 			struct clock_event_device *evt)
 {
-	hpet_set_mode(mode, evt, 0);
+	return hpet_set_mode(mode, evt, 0);
 }
 
 static int hpet_legacy_next_event(unsigned long delta,
@@ -462,11 +465,11 @@ void hpet_msi_read(struct hpet_dev *hdev, struct msi_msg *msg)
 	msg->address_hi = 0;
 }
 
-static void hpet_msi_set_mode(enum clock_event_mode mode,
+static int hpet_msi_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	struct hpet_dev *hdev = EVT_TO_HPET_DEV(evt);
-	hpet_set_mode(mode, evt, hdev->num);
+	return hpet_set_mode(mode, evt, hdev->num);
 }
 
 static int hpet_msi_next_event(unsigned long delta,
@@ -558,7 +561,7 @@ static void init_one_hpet_msi_clockevent(struct hpet_dev *hdev, int cpu)
 	if (hdev->flags & HPET_DEV_PERI_CAP)
 		evt->features |= CLOCK_EVT_FEAT_PERIODIC;
 
-	evt->set_mode = hpet_msi_set_mode;
+	evt->set_dev_mode = hpet_msi_set_mode;
 	evt->set_next_event = hpet_msi_next_event;
 	evt->cpumask = cpumask_of(hdev->cpu);
 

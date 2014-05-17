@@ -962,7 +962,7 @@ static int lguest_clockevent_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void lguest_clockevent_set_mode(enum clock_event_mode mode,
+static int lguest_clockevent_set_mode(enum clock_event_mode mode,
                                       struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -978,7 +978,10 @@ static void lguest_clockevent_set_mode(enum clock_event_mode mode,
 		BUG();
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 /* This describes our primitive timer chip. */
@@ -986,7 +989,7 @@ static struct clock_event_device lguest_clockevent = {
 	.name                   = "lguest",
 	.features               = CLOCK_EVT_FEAT_ONESHOT,
 	.set_next_event         = lguest_clockevent_set_next_event,
-	.set_mode               = lguest_clockevent_set_mode,
+	.set_dev_mode           = lguest_clockevent_set_mode,
 	.rating                 = INT_MAX,
 	.mult                   = 1,
 	.shift                  = 0,
