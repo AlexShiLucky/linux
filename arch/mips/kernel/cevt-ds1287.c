@@ -59,10 +59,11 @@ static int ds1287_set_next_event(unsigned long delta,
 	return -EINVAL;
 }
 
-static void ds1287_set_mode(enum clock_event_mode mode,
+static int ds1287_set_mode(enum clock_event_mode mode,
 			    struct clock_event_device *evt)
 {
 	u8 val;
+	int ret = 0;
 
 	spin_lock(&rtc_lock);
 
@@ -73,6 +74,10 @@ static void ds1287_set_mode(enum clock_event_mode mode,
 		val |= RTC_PIE;
 		break;
 	default:
+		ret = -ENOSYS;
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 		val &= ~RTC_PIE;
 		break;
 	}
@@ -80,6 +85,7 @@ static void ds1287_set_mode(enum clock_event_mode mode,
 	CMOS_WRITE(val, RTC_REG_B);
 
 	spin_unlock(&rtc_lock);
+	return ret;
 }
 
 static void ds1287_event_handler(struct clock_event_device *dev)
@@ -90,7 +96,7 @@ static struct clock_event_device ds1287_clockevent = {
 	.name		= "ds1287",
 	.features	= CLOCK_EVT_FEAT_PERIODIC,
 	.set_next_event = ds1287_set_next_event,
-	.set_mode	= ds1287_set_mode,
+	.set_dev_mode	= ds1287_set_mode,
 	.event_handler	= ds1287_event_handler,
 };
 

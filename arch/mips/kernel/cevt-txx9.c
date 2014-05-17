@@ -76,7 +76,7 @@ static void txx9tmr_stop_and_clear(struct txx9_tmr_reg __iomem *tmrptr)
 	__raw_writel(0, &tmrptr->tisr);
 }
 
-static void txx9tmr_set_mode(enum clock_event_mode mode,
+static int txx9tmr_set_mode(enum clock_event_mode mode,
 			     struct clock_event_device *evt)
 {
 	struct txx9_clock_event_device *txx9_cd =
@@ -105,7 +105,10 @@ static void txx9tmr_set_mode(enum clock_event_mode mode,
 		__raw_writel(TIMER_CCD, &tmrptr->ccdr);
 		__raw_writel(0, &tmrptr->itmr);
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int txx9tmr_set_next_event(unsigned long delta,
@@ -128,7 +131,7 @@ static struct txx9_clock_event_device txx9_clock_event_device = {
 		.features	= CLOCK_EVT_FEAT_PERIODIC |
 				  CLOCK_EVT_FEAT_ONESHOT,
 		.rating		= 200,
-		.set_mode	= txx9tmr_set_mode,
+		.set_dev_mode	= txx9tmr_set_mode,
 		.set_next_event = txx9tmr_set_next_event,
 	},
 };

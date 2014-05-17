@@ -63,10 +63,20 @@ static int rt_next_event(unsigned long delta, struct clock_event_device *evt)
 	return LOCAL_HUB_L(PI_RT_COUNT) >= cnt ? -ETIME : 0;
 }
 
-static void rt_set_mode(enum clock_event_mode mode,
+static int rt_set_mode(enum clock_event_mode mode,
 		struct clock_event_device *evt)
 {
+	switch (mode) {
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 	/* Nothing to do ...  */
+		break;
+	default:
+		return -ENOSYS;
+	}
+	return 0;
 }
 
 unsigned int rt_timer_irq;
@@ -123,7 +133,7 @@ void hub_rt_clock_event_init(void)
 	cd->irq			= irq;
 	cd->cpumask		= cpumask_of(cpu);
 	cd->set_next_event	= rt_next_event;
-	cd->set_mode		= rt_set_mode;
+	cd->set_dev_mode	= rt_set_mode;
 	clockevents_register_device(cd);
 }
 

@@ -14,7 +14,7 @@
 #define SNI_COUNTER2_DIV	64
 #define SNI_COUNTER0_DIV	((SNI_CLOCK_TICK_RATE / SNI_COUNTER2_DIV) / HZ)
 
-static void a20r_set_mode(enum clock_event_mode mode,
+static int a20r_set_mode(enum clock_event_mode mode,
 			  struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -40,7 +40,10 @@ static void a20r_set_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device a20r_clockevent_device = {
@@ -51,7 +54,7 @@ static struct clock_event_device a20r_clockevent_device = {
 
 	.rating		= 300,
 	.irq		= SNI_A20R_IRQ_TIMER,
-	.set_mode	= a20r_set_mode,
+	.set_dev_mode	= a20r_set_mode,
 };
 
 static irqreturn_t a20r_interrupt(int irq, void *dev_id)

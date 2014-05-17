@@ -57,7 +57,7 @@ static irqreturn_t jz4740_clockevent_irq(int irq, void *devid)
 	return IRQ_HANDLED;
 }
 
-static void jz4740_clockevent_set_mode(enum clock_event_mode mode,
+static int jz4740_clockevent_set_mode(enum clock_event_mode mode,
 	struct clock_event_device *cd)
 {
 	switch (mode) {
@@ -72,9 +72,12 @@ static void jz4740_clockevent_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 		jz4740_timer_disable(TIMER_CLOCKEVENT);
 		break;
-	default:
+	case CLOCK_EVT_MODE_UNUSED:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int jz4740_clockevent_set_next(unsigned long evt,
@@ -91,7 +94,7 @@ static struct clock_event_device jz4740_clockevent = {
 	.name = "jz4740-timer",
 	.features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.set_next_event = jz4740_clockevent_set_next,
-	.set_mode = jz4740_clockevent_set_mode,
+	.set_dev_mode = jz4740_clockevent_set_mode,
 	.rating = 200,
 	.irq = JZ4740_IRQ_TCU0,
 };
