@@ -98,7 +98,7 @@ static int xilinx_timer_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void xilinx_timer_set_mode(enum clock_event_mode mode,
+static int xilinx_timer_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -119,7 +119,10 @@ static void xilinx_timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		pr_info("%s: resume\n", __func__);
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device clockevent_xilinx_timer = {
@@ -128,7 +131,7 @@ static struct clock_event_device clockevent_xilinx_timer = {
 	.shift		= 8,
 	.rating		= 300,
 	.set_next_event	= xilinx_timer_set_next_event,
-	.set_mode	= xilinx_timer_set_mode,
+	.set_dev_mode	= xilinx_timer_set_mode,
 };
 
 static inline void timer_ack(void)

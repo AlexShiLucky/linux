@@ -52,7 +52,7 @@ static struct clocksource ccount_clocksource = {
 
 static int ccount_timer_set_next_event(unsigned long delta,
 		struct clock_event_device *dev);
-static void ccount_timer_set_mode(enum clock_event_mode mode,
+static int ccount_timer_set_mode(enum clock_event_mode mode,
 		struct clock_event_device *evt);
 struct ccount_timer {
 	struct clock_event_device evt;
@@ -77,7 +77,7 @@ static int ccount_timer_set_next_event(unsigned long delta,
 	return ret;
 }
 
-static void ccount_timer_set_mode(enum clock_event_mode mode,
+static int ccount_timer_set_mode(enum clock_event_mode mode,
 		struct clock_event_device *evt)
 {
 	struct ccount_timer *timer =
@@ -104,8 +104,9 @@ static void ccount_timer_set_mode(enum clock_event_mode mode,
 			timer->irq_enabled = 1;
 		}
 	default:
-		break;
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static irqreturn_t timer_interrupt(int irq, void *dev_id);
@@ -126,7 +127,7 @@ void local_timer_setup(unsigned cpu)
 	clockevent->features = CLOCK_EVT_FEAT_ONESHOT;
 	clockevent->rating = 300;
 	clockevent->set_next_event = ccount_timer_set_next_event;
-	clockevent->set_mode = ccount_timer_set_mode;
+	clockevent->set_dev_mode = ccount_timer_set_mode;
 	clockevent->cpumask = cpumask_of(cpu);
 	clockevent->irq = irq_create_mapping(NULL, LINUX_TIMER_INT);
 	if (WARN(!clockevent->irq, "error: can't map timer irq"))

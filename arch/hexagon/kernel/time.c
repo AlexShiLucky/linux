@@ -100,15 +100,20 @@ static int set_next_event(unsigned long delta, struct clock_event_device *evt)
 /*
  * Sets the mode (periodic, shutdown, oneshot, etc) of a timer.
  */
-static void set_mode(enum clock_event_mode mode,
+static int set_mode(enum clock_event_mode mode,
 	struct clock_event_device *evt)
 {
 	switch (mode) {
 	case CLOCK_EVT_MODE_SHUTDOWN:
 		/* XXX implement me */
-	default:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 #ifdef CONFIG_SMP
@@ -125,7 +130,7 @@ static struct clock_event_device hexagon_clockevent_dev = {
 	.rating		= 400,
 	.irq		= RTOS_TIMER_INT,
 	.set_next_event = set_next_event,
-	.set_mode	= set_mode,
+	.set_dev_mode	= set_mode,
 #ifdef CONFIG_SMP
 	.broadcast	= broadcast,
 #endif

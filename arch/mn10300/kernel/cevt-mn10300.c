@@ -41,10 +41,20 @@ static int next_event(unsigned long delta,
 	return 0;
 }
 
-static void set_clock_mode(enum clock_event_mode mode,
+static int set_clock_mode(enum clock_event_mode mode,
 			   struct clock_event_device *evt)
 {
+	switch (mode) {
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 	/* Nothing to do ...  */
+		break;
+	default:
+		return -ENOSYS;
+	}
+	return 0;
 }
 
 static DEFINE_PER_CPU(struct clock_event_device, mn10300_clockevent_device);
@@ -108,7 +118,7 @@ int __init init_clockevents(void)
 
 	cd->rating		= 200;
 	cd->cpumask		= cpumask_of(smp_processor_id());
-	cd->set_mode		= set_clock_mode;
+	cd->set_dev_mode	= set_clock_mode;
 	cd->event_handler	= event_handler;
 	cd->set_next_event	= next_event;
 

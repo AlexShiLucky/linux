@@ -39,9 +39,20 @@ void local_timer_interrupt(void)
 	irq_exit();
 }
 
-static void dummy_timer_set_mode(enum clock_event_mode mode,
+static int dummy_timer_set_mode(enum clock_event_mode mode,
 				 struct clock_event_device *clk)
 {
+	switch (mode) {
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_PERIODIC:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
+		break;
+	default:
+		return -ENOSYS;
+	}
+	return 0;
 }
 
 void local_timer_setup(unsigned int cpu)
@@ -54,7 +65,7 @@ void local_timer_setup(unsigned int cpu)
 				  CLOCK_EVT_FEAT_DUMMY;
 	clk->rating		= 400;
 	clk->mult		= 1;
-	clk->set_mode		= dummy_timer_set_mode;
+	clk->set_dev_mode	= dummy_timer_set_mode;
 	clk->broadcast		= smp_timer_broadcast;
 	clk->cpumask		= cpumask_of(cpu);
 

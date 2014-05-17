@@ -179,7 +179,7 @@ static int arc_clkevent_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void arc_clkevent_set_mode(enum clock_event_mode mode,
+static int arc_clkevent_set_mode(enum clock_event_mode mode,
 				  struct clock_event_device *dev)
 {
 	switch (mode) {
@@ -187,12 +187,15 @@ static void arc_clkevent_set_mode(enum clock_event_mode mode,
 		arc_timer_event_setup(arc_get_core_freq() / HZ);
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
 	default:
-		break;
+		return -ENOSYS;
 	}
 
-	return;
+	return 0;
 }
 
 static DEFINE_PER_CPU(struct clock_event_device, arc_clockevent_device) = {
@@ -202,7 +205,7 @@ static DEFINE_PER_CPU(struct clock_event_device, arc_clockevent_device) = {
 	.rating		= 300,
 	.irq		= TIMER0_IRQ,	/* hardwired, no need for resources */
 	.set_next_event = arc_clkevent_set_next_event,
-	.set_mode	= arc_clkevent_set_mode,
+	.set_dev_mode	= arc_clkevent_set_mode,
 };
 
 static irqreturn_t timer_irq_handler(int irq, void *dev_id)
