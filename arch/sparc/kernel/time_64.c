@@ -692,7 +692,7 @@ static int sparc64_next_event(unsigned long delta,
 	return tick_ops->add_compare(delta) ? -ETIME : 0;
 }
 
-static void sparc64_timer_setup(enum clock_event_mode mode,
+static int sparc64_timer_setup(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -708,12 +708,15 @@ static void sparc64_timer_setup(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_UNUSED:
 		WARN_ON(1);
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device sparc64_clockevent = {
 	.features	= CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= sparc64_timer_setup,
+	.set_dev_mode	= sparc64_timer_setup,
 	.set_next_event	= sparc64_next_event,
 	.rating		= 100,
 	.shift		= 30,
