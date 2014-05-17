@@ -56,7 +56,7 @@ static int metag_timer_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void metag_timer_set_mode(enum clock_event_mode mode,
+static int metag_timer_set_mode(enum clock_event_mode mode,
 				 struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -72,7 +72,10 @@ static void metag_timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_UNUSED:
 		WARN_ON(1);
 		break;
+	default:
+		return -ENOSYS;
 	};
+	return 0;
 }
 
 static cycle_t metag_clocksource_read(struct clocksource *cs)
@@ -129,7 +132,7 @@ static void arch_timer_setup(unsigned int cpu)
 	clk->rating = 200,
 	clk->shift = 12,
 	clk->irq = tbisig_map(TBID_SIGNUM_TRT),
-	clk->set_mode = metag_timer_set_mode,
+	clk->set_dev_mode = metag_timer_set_mode,
 	clk->set_next_event = metag_timer_set_next_event,
 
 	clk->mult = div_sc(hwtimer_freq, NSEC_PER_SEC, clk->shift);

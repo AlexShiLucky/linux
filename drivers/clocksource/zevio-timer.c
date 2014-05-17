@@ -76,7 +76,7 @@ static int zevio_timer_set_event(unsigned long delta,
 	return 0;
 }
 
-static void zevio_timer_set_mode(enum clock_event_mode mode,
+static int zevio_timer_set_mode(enum clock_event_mode mode,
 				 struct clock_event_device *dev)
 {
 	struct zevio_timer *timer = container_of(dev, struct zevio_timer,
@@ -98,10 +98,12 @@ static void zevio_timer_set_mode(enum clock_event_mode mode,
 		writel(CNTL_STOP_TIMER, timer->timer1 + IO_CONTROL);
 		break;
 	case CLOCK_EVT_MODE_PERIODIC:
-	default:
 		/* Unsupported */
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static irqreturn_t zevio_timer_interrupt(int irq, void *dev_id)
@@ -162,7 +164,7 @@ static int __init zevio_timer_add(struct device_node *node)
 	if (timer->interrupt_regs && irqnr) {
 		timer->clkevt.name		= timer->clockevent_name;
 		timer->clkevt.set_next_event	= zevio_timer_set_event;
-		timer->clkevt.set_mode		= zevio_timer_set_mode;
+		timer->clkevt.set_dev_mode	= zevio_timer_set_mode;
 		timer->clkevt.rating		= 200;
 		timer->clkevt.cpumask		= cpu_all_mask;
 		timer->clkevt.features		= CLOCK_EVT_FEAT_ONESHOT;

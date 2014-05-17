@@ -88,7 +88,7 @@ static int vt8500_timer_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void vt8500_timer_set_mode(enum clock_event_mode mode,
+static int vt8500_timer_set_mode(enum clock_event_mode mode,
 			      struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -102,7 +102,10 @@ static void vt8500_timer_set_mode(enum clock_event_mode mode,
 			regbase + TIMER_CTRL_VAL);
 		writel(0, regbase + TIMER_IER_VAL);
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device clockevent = {
@@ -110,7 +113,7 @@ static struct clock_event_device clockevent = {
 	.features       = CLOCK_EVT_FEAT_ONESHOT,
 	.rating         = 200,
 	.set_next_event = vt8500_timer_set_next_event,
-	.set_mode       = vt8500_timer_set_mode,
+	.set_dev_mode	= vt8500_timer_set_mode,
 };
 
 static irqreturn_t vt8500_timer_interrupt(int irq, void *dev_id)

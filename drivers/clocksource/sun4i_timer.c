@@ -81,9 +81,11 @@ static void sun4i_clkevt_time_start(u8 timer, bool periodic)
 	       timer_base + TIMER_CTL_REG(timer));
 }
 
-static void sun4i_clkevt_mode(enum clock_event_mode mode,
+static int sun4i_clkevt_mode(enum clock_event_mode mode,
 			      struct clock_event_device *clk)
 {
+	int ret = 0;
+
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
 		sun4i_clkevt_time_stop(0);
@@ -94,12 +96,15 @@ static void sun4i_clkevt_mode(enum clock_event_mode mode,
 		sun4i_clkevt_time_stop(0);
 		sun4i_clkevt_time_start(0, false);
 		break;
+	default:
+		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
-	default:
+	case CLOCK_EVT_MODE_RESUME:
 		sun4i_clkevt_time_stop(0);
 		break;
 	}
+	return ret;
 }
 
 static int sun4i_clkevt_next_event(unsigned long evt,
@@ -116,7 +121,7 @@ static struct clock_event_device sun4i_clockevent = {
 	.name = "sun4i_tick",
 	.rating = 350,
 	.features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode = sun4i_clkevt_mode,
+	.set_dev_mode = sun4i_clkevt_mode,
 	.set_next_event = sun4i_clkevt_next_event,
 };
 

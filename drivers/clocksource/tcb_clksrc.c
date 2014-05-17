@@ -91,7 +91,7 @@ static struct tc_clkevt_device *to_tc_clkevt(struct clock_event_device *clkevt)
  */
 static u32 timer_clock;
 
-static void tc_mode(enum clock_event_mode m, struct clock_event_device *d)
+static int tc_mode(enum clock_event_mode m, struct clock_event_device *d)
 {
 	struct tc_clkevt_device *tcd = to_tc_clkevt(d);
 	void __iomem		*regs = tcd->regs;
@@ -137,9 +137,14 @@ static void tc_mode(enum clock_event_mode m, struct clock_event_device *d)
 		/* set_next_event() configures and starts the timer */
 		break;
 
-	default:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int tc_next_event(unsigned long delta, struct clock_event_device *d)
@@ -160,7 +165,7 @@ static struct tc_clkevt_device clkevt = {
 		/* Should be lower than at91rm9200's system timer */
 		.rating		= 125,
 		.set_next_event	= tc_next_event,
-		.set_mode	= tc_mode,
+		.set_dev_mode	= tc_mode,
 	},
 };
 

@@ -189,7 +189,7 @@ static int ttc_set_next_event(unsigned long cycles,
  * @mode:	Mode to be set
  * @evt:	Address of clock event instance
  **/
-static void ttc_set_mode(enum clock_event_mode mode,
+static int ttc_set_mode(enum clock_event_mode mode,
 					struct clock_event_device *evt)
 {
 	struct ttc_timer_clockevent *ttce = to_ttc_timer_clkevent(evt);
@@ -217,7 +217,10 @@ static void ttc_set_mode(enum clock_event_mode mode,
 		__raw_writel(ctrl_reg,
 				timer->base_addr + TTC_CNT_CNTRL_OFFSET);
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int ttc_rate_change_clocksource_cb(struct notifier_block *nb,
@@ -377,7 +380,7 @@ static void __init ttc_setup_clockevent(struct clk *clk,
 	ttcce->ce.name = "ttc_clockevent";
 	ttcce->ce.features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT;
 	ttcce->ce.set_next_event = ttc_set_next_event;
-	ttcce->ce.set_mode = ttc_set_mode;
+	ttcce->ce.set_dev_mode = ttc_set_mode;
 	ttcce->ce.rating = 200;
 	ttcce->ce.irq = irq;
 	ttcce->ce.cpumask = cpu_possible_mask;

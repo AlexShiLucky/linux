@@ -48,7 +48,7 @@ struct efm32_clock_event_ddata {
 	unsigned periodic_top;
 };
 
-static void efm32_clock_event_set_mode(enum clock_event_mode mode,
+static int efm32_clock_event_set_mode(enum clock_event_mode mode,
 				       struct clock_event_device *evtdev)
 {
 	struct efm32_clock_event_ddata *ddata =
@@ -81,7 +81,10 @@ static void efm32_clock_event_set_mode(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int efm32_clock_event_set_next_event(unsigned long evt,
@@ -112,7 +115,7 @@ static struct efm32_clock_event_ddata clock_event_ddata = {
 	.evtdev = {
 		.name = "efm32 clockevent",
 		.features = CLOCK_EVT_FEAT_ONESHOT | CLOCK_EVT_MODE_PERIODIC,
-		.set_mode = efm32_clock_event_set_mode,
+		.set_dev_mode = efm32_clock_event_set_mode,
 		.set_next_event = efm32_clock_event_set_next_event,
 		.rating = 200,
 	},

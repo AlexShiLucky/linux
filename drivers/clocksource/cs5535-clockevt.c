@@ -77,15 +77,26 @@ static void start_timer(struct cs5535_mfgpt_timer *timer, uint16_t delta)
 			MFGPT_SETUP_CNTEN | MFGPT_SETUP_CMP2);
 }
 
-static void mfgpt_set_mode(enum clock_event_mode mode,
+static int mfgpt_set_mode(enum clock_event_mode mode,
 		struct clock_event_device *evt)
 {
 	disable_timer(cs5535_event_clock);
 
-	if (mode == CLOCK_EVT_MODE_PERIODIC)
+	switch (mode) {
+	case CLOCK_EVT_MODE_PERIODIC:
 		start_timer(cs5535_event_clock, MFGPT_PERIODIC);
+		break;
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
+		break;
+	default:
+		return -ENOSYS;
+	}
 
 	cs5535_tick_mode = mode;
+	return 0;
 }
 
 static int mfgpt_next_event(unsigned long delta, struct clock_event_device *evt)
@@ -97,7 +108,7 @@ static int mfgpt_next_event(unsigned long delta, struct clock_event_device *evt)
 static struct clock_event_device cs5535_clockevent = {
 	.name = DRV_NAME,
 	.features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode = mfgpt_set_mode,
+	.set_dev_mode = mfgpt_set_mode,
 	.set_next_event = mfgpt_next_event,
 	.rating = 250,
 };

@@ -69,7 +69,7 @@ static int tegra_timer_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void tegra_timer_set_mode(enum clock_event_mode mode,
+static int tegra_timer_set_mode(enum clock_event_mode mode,
 				    struct clock_event_device *evt)
 {
 	u32 reg;
@@ -87,7 +87,10 @@ static void tegra_timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device tegra_clockevent = {
@@ -95,7 +98,7 @@ static struct clock_event_device tegra_clockevent = {
 	.rating		= 300,
 	.features	= CLOCK_EVT_FEAT_ONESHOT | CLOCK_EVT_FEAT_PERIODIC,
 	.set_next_event	= tegra_timer_set_next_event,
-	.set_mode	= tegra_timer_set_mode,
+	.set_dev_mode	= tegra_timer_set_mode,
 };
 
 static u64 notrace tegra_read_sched_clock(void)

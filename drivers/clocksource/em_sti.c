@@ -251,7 +251,7 @@ static struct em_sti_priv *ced_to_em_sti(struct clock_event_device *ced)
 	return container_of(ced, struct em_sti_priv, ced);
 }
 
-static void em_sti_clock_event_mode(enum clock_event_mode mode,
+static int em_sti_clock_event_mode(enum clock_event_mode mode,
 				    struct clock_event_device *ced)
 {
 	struct em_sti_priv *p = ced_to_em_sti(ced);
@@ -275,9 +275,12 @@ static void em_sti_clock_event_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_UNUSED:
 		em_sti_stop(p, USER_CLOCKEVENT);
 		break;
-	default:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int em_sti_clock_event_next(unsigned long delta,
@@ -303,11 +306,11 @@ static void em_sti_register_clockevent(struct em_sti_priv *p)
 	ced->rating = 200;
 	ced->cpumask = cpu_possible_mask;
 	ced->set_next_event = em_sti_clock_event_next;
-	ced->set_mode = em_sti_clock_event_mode;
+	ced->set_dev_mode = em_sti_clock_event_mode;
 
 	dev_info(&p->pdev->dev, "used for clock events\n");
 
-	/* Register with dummy 1 Hz value, gets updated in ->set_mode() */
+	/* Register with dummy 1 Hz value, gets updated in ->set_dev_mode() */
 	clockevents_config_and_register(ced, 1, 2, 0xffffffff);
 }
 

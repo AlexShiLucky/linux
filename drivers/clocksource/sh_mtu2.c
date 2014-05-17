@@ -210,9 +210,12 @@ static void sh_mtu2_clock_event_mode(enum clock_event_mode mode,
 			sh_mtu2_disable(p);
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
-	default:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static void sh_mtu2_clock_event_suspend(struct clock_event_device *ced)
@@ -237,7 +240,7 @@ static void sh_mtu2_register_clockevent(struct sh_mtu2_priv *p,
 	ced->features = CLOCK_EVT_FEAT_PERIODIC;
 	ced->rating = rating;
 	ced->cpumask = cpumask_of(0);
-	ced->set_mode = sh_mtu2_clock_event_mode;
+	ced->set_dev_mode = sh_mtu2_clock_event_mode;
 	ced->suspend = sh_mtu2_clock_event_suspend;
 	ced->resume = sh_mtu2_clock_event_resume;
 

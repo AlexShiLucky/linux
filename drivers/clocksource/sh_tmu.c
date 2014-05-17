@@ -321,7 +321,7 @@ static void sh_tmu_clock_event_start(struct sh_tmu_priv *p, int periodic)
 	}
 }
 
-static void sh_tmu_clock_event_mode(enum clock_event_mode mode,
+static int sh_tmu_clock_event_mode(enum clock_event_mode mode,
 				    struct clock_event_device *ced)
 {
 	struct sh_tmu_priv *p = ced_to_sh_tmu(ced);
@@ -352,9 +352,12 @@ static void sh_tmu_clock_event_mode(enum clock_event_mode mode,
 			sh_tmu_disable(p);
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
-	default:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int sh_tmu_clock_event_next(unsigned long delta,
@@ -393,7 +396,7 @@ static void sh_tmu_register_clockevent(struct sh_tmu_priv *p,
 	ced->rating = rating;
 	ced->cpumask = cpumask_of(0);
 	ced->set_next_event = sh_tmu_clock_event_next;
-	ced->set_mode = sh_tmu_clock_event_mode;
+	ced->set_dev_mode = sh_tmu_clock_event_mode;
 	ced->suspend = sh_tmu_clock_event_suspend;
 	ced->resume = sh_tmu_clock_event_resume;
 

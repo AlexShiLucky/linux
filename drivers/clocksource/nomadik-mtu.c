@@ -119,7 +119,7 @@ static void nmdk_clkevt_reset(void)
 	}
 }
 
-static void nmdk_clkevt_mode(enum clock_event_mode mode,
+static int nmdk_clkevt_mode(enum clock_event_mode mode,
 			     struct clock_event_device *dev)
 {
 	switch (mode) {
@@ -140,7 +140,10 @@ static void nmdk_clkevt_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static void nmdk_clksrc_reset(void)
@@ -167,7 +170,7 @@ static struct clock_event_device nmdk_clkevt = {
 	.features	= CLOCK_EVT_FEAT_ONESHOT | CLOCK_EVT_FEAT_PERIODIC |
 	                  CLOCK_EVT_FEAT_DYNIRQ,
 	.rating		= 200,
-	.set_mode	= nmdk_clkevt_mode,
+	.set_dev_mode	= nmdk_clkevt_mode,
 	.set_next_event	= nmdk_clkevt_next,
 	.resume		= nmdk_clkevt_resume,
 };

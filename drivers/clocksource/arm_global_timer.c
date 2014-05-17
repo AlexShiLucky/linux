@@ -107,7 +107,7 @@ static void gt_compare_set(unsigned long delta, int periodic)
 	writel(ctrl, gt_base + GT_CONTROL);
 }
 
-static void gt_clockevent_set_mode(enum clock_event_mode mode,
+static int gt_clockevent_set_mode(enum clock_event_mode mode,
 				   struct clock_event_device *clk)
 {
 	unsigned long ctrl;
@@ -124,9 +124,12 @@ static void gt_clockevent_set_mode(enum clock_event_mode mode,
 				GT_CONTROL_IRQ_ENABLE | GT_CONTROL_AUTO_INC);
 		writel(ctrl, gt_base + GT_CONTROL);
 		break;
-	default:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int gt_clockevent_set_next_event(unsigned long evt,
@@ -171,7 +174,7 @@ static int gt_clockevents_init(struct clock_event_device *clk)
 	clk->name = "arm_global_timer";
 	clk->features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT |
 		CLOCK_EVT_FEAT_PERCPU;
-	clk->set_mode = gt_clockevent_set_mode;
+	clk->set_dev_mode = gt_clockevent_set_mode;
 	clk->set_next_event = gt_clockevent_set_next_event;
 	clk->cpumask = cpumask_of(cpu);
 	clk->rating = 300;
