@@ -244,7 +244,7 @@ static int exynos4_comp_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void exynos4_comp_set_mode(enum clock_event_mode mode,
+static int exynos4_comp_set_mode(enum clock_event_mode mode,
 				  struct clock_event_device *evt)
 {
 	unsigned long cycles_per_jiffy;
@@ -262,7 +262,10 @@ static void exynos4_comp_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device mct_comp_device = {
@@ -270,7 +273,7 @@ static struct clock_event_device mct_comp_device = {
 	.features       = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.rating		= 250,
 	.set_next_event	= exynos4_comp_set_next_event,
-	.set_mode	= exynos4_comp_set_mode,
+	.set_dev_mode	= exynos4_comp_set_mode,
 };
 
 static irqreturn_t exynos4_mct_comp_isr(int irq, void *dev_id)
@@ -346,7 +349,7 @@ static int exynos4_tick_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static inline void exynos4_tick_set_mode(enum clock_event_mode mode,
+static inline int exynos4_tick_set_mode(enum clock_event_mode mode,
 					 struct clock_event_device *evt)
 {
 	struct mct_clock_event_device *mevt = this_cpu_ptr(&percpu_mct_tick);
@@ -366,7 +369,10 @@ static inline void exynos4_tick_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int exynos4_mct_tick_clear(struct mct_clock_event_device *mevt)
@@ -415,7 +421,7 @@ static int exynos4_local_timer_setup(struct clock_event_device *evt)
 	evt->name = mevt->name;
 	evt->cpumask = cpumask_of(cpu);
 	evt->set_next_event = exynos4_tick_set_next_event;
-	evt->set_mode = exynos4_tick_set_mode;
+	evt->set_dev_mode = exynos4_tick_set_mode;
 	evt->features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT;
 	evt->rating = 450;
 
@@ -442,7 +448,7 @@ static int exynos4_local_timer_setup(struct clock_event_device *evt)
 
 static void exynos4_local_timer_stop(struct clock_event_device *evt)
 {
-	evt->set_mode(CLOCK_EVT_MODE_UNUSED, evt);
+	evt->set_dev_mode(CLOCK_EVT_MODE_UNUSED, evt);
 	if (mct_int_type == MCT_INT_SPI)
 		free_irq(evt->irq, this_cpu_ptr(&percpu_mct_tick));
 	else

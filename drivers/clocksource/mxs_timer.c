@@ -150,7 +150,7 @@ static const char *clock_event_mode_label[] const = {
 };
 #endif /* DEBUG */
 
-static void mxs_set_mode(enum clock_event_mode mode,
+static int mxs_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	/* Disable interrupt in timer module */
@@ -190,13 +190,16 @@ static void mxs_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		/* Left event sources disabled, no more interrupts appear */
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device mxs_clockevent_device = {
 	.name		= "mxs_timrot",
 	.features	= CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= mxs_set_mode,
+	.set_dev_mode	= mxs_set_mode,
 	.set_next_event	= timrotv2_set_next_event,
 	.rating		= 200,
 };

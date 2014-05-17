@@ -73,18 +73,29 @@ static int orion_clkevt_next_event(unsigned long delta,
 	return 0;
 }
 
-static void orion_clkevt_mode(enum clock_event_mode mode,
+static int orion_clkevt_mode(enum clock_event_mode mode,
 			      struct clock_event_device *dev)
 {
-	if (mode == CLOCK_EVT_MODE_PERIODIC) {
+	int ret = 0;
+
+	switch (mode) {
+	case CLOCK_EVT_MODE_PERIODIC:
 		/* setup and enable periodic timer at 1/HZ intervals */
 		writel(ticks_per_jiffy - 1, timer_base + TIMER1_RELOAD);
 		writel(ticks_per_jiffy - 1, timer_base + TIMER1_VAL);
 		orion_timer_ctrl_clrset(0, TIMER1_RELOAD_EN | TIMER1_EN);
-	} else {
+		break;
+	default:
+		ret = -ENOSYS;
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 		/* disable timer */
 		orion_timer_ctrl_clrset(TIMER1_RELOAD_EN | TIMER1_EN, 0);
+		break;
 	}
+	return ret;
 }
 
 static struct clock_event_device orion_clkevt = {
@@ -93,7 +104,7 @@ static struct clock_event_device orion_clkevt = {
 	.shift		= 32,
 	.rating		= 300,
 	.set_next_event	= orion_clkevt_next_event,
-	.set_mode	= orion_clkevt_mode,
+	.set_dev_mode	= orion_clkevt_mode,
 };
 
 static irqreturn_t orion_clkevt_irq_handler(int irq, void *dev_id)

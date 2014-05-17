@@ -86,16 +86,22 @@ static int pit_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void pit_set_mode(enum clock_event_mode mode,
+static int pit_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
 		pit_set_next_event(cycle_per_jiffy, evt);
 		break;
-	default:
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static irqreturn_t pit_timer_interrupt(int irq, void *dev_id)
@@ -121,7 +127,7 @@ static irqreturn_t pit_timer_interrupt(int irq, void *dev_id)
 static struct clock_event_device clockevent_pit = {
 	.name		= "VF pit timer",
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= pit_set_mode,
+	.set_dev_mode	= pit_set_mode,
 	.set_next_event	= pit_set_next_event,
 	.rating		= 300,
 };

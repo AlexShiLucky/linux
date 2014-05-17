@@ -110,7 +110,7 @@ static void apbt_enable_int(struct dw_apb_timer *timer)
 	apbt_writel(timer, ctrl, APBTMR_N_CONTROL);
 }
 
-static void apbt_set_mode(enum clock_event_mode mode,
+static int apbt_set_mode(enum clock_event_mode mode,
 			  struct clock_event_device *evt)
 {
 	unsigned long ctrl;
@@ -173,7 +173,10 @@ static void apbt_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		apbt_enable_int(&dw_ced->timer);
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int apbt_next_event(unsigned long delta,
@@ -232,7 +235,7 @@ dw_apb_clockevent_init(int cpu, const char *name, unsigned rating,
 	dw_ced->ced.min_delta_ns = clockevent_delta2ns(5000, &dw_ced->ced);
 	dw_ced->ced.cpumask = cpumask_of(cpu);
 	dw_ced->ced.features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT;
-	dw_ced->ced.set_mode = apbt_set_mode;
+	dw_ced->ced.set_dev_mode = apbt_set_mode;
 	dw_ced->ced.set_next_event = apbt_next_event;
 	dw_ced->ced.irq = dw_ced->timer.irq;
 	dw_ced->ced.rating = rating;

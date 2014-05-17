@@ -97,7 +97,7 @@ static int sirfsoc_timer_set_next_event(unsigned long delta,
 	return next - now > delta ? -ETIME : 0;
 }
 
-static void sirfsoc_timer_set_mode(enum clock_event_mode mode,
+static int sirfsoc_timer_set_mode(enum clock_event_mode mode,
 	struct clock_event_device *ce)
 {
 	u32 val = readl_relaxed(sirfsoc_timer_base + SIRFSOC_TIMER_INT_EN);
@@ -114,7 +114,10 @@ static void sirfsoc_timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static void sirfsoc_clocksource_suspend(struct clocksource *cs)
@@ -142,7 +145,7 @@ static struct clock_event_device sirfsoc_clockevent = {
 	.name = "sirfsoc_clockevent",
 	.rating = 200,
 	.features = CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode = sirfsoc_timer_set_mode,
+	.set_dev_mode = sirfsoc_timer_set_mode,
 	.set_next_event = sirfsoc_timer_set_next_event,
 };
 

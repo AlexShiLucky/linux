@@ -207,7 +207,7 @@ static int samsung_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void samsung_set_mode(enum clock_event_mode mode,
+static int samsung_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	samsung_time_stop(pwm.event_id);
@@ -225,7 +225,10 @@ static void samsung_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static void samsung_clockevent_resume(struct clock_event_device *cev)
@@ -244,7 +247,7 @@ static struct clock_event_device time_event_device = {
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.rating		= 200,
 	.set_next_event	= samsung_set_next_event,
-	.set_mode	= samsung_set_mode,
+	.set_dev_mode	= samsung_set_mode,
 	.resume		= samsung_clockevent_resume,
 };
 
