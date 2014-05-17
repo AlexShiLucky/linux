@@ -274,7 +274,7 @@ static s64 get_abs_timeout(unsigned long delta)
 	return xen_clocksource_read() + delta;
 }
 
-static void xen_timerop_set_mode(enum clock_event_mode mode,
+static int xen_timerop_set_mode(enum clock_event_mode mode,
 				 struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -291,7 +291,10 @@ static void xen_timerop_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 		HYPERVISOR_set_timer_op(0);  /* cancel timeout */
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int xen_timerop_set_next_event(unsigned long delta,
@@ -320,13 +323,13 @@ static const struct clock_event_device xen_timerop_clockevent = {
 	.shift = 0,
 	.rating = 500,
 
-	.set_mode = xen_timerop_set_mode,
+	.set_dev_mode = xen_timerop_set_mode,
 	.set_next_event = xen_timerop_set_next_event,
 };
 
 
 
-static void xen_vcpuop_set_mode(enum clock_event_mode mode,
+static int xen_vcpuop_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	int cpu = smp_processor_id();
@@ -349,7 +352,10 @@ static void xen_vcpuop_set_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int xen_vcpuop_set_next_event(unsigned long delta,
@@ -382,7 +388,7 @@ static const struct clock_event_device xen_vcpuop_clockevent = {
 	.shift = 0,
 	.rating = 500,
 
-	.set_mode = xen_vcpuop_set_mode,
+	.set_dev_mode = xen_vcpuop_set_mode,
 	.set_next_event = xen_vcpuop_set_next_event,
 };
 

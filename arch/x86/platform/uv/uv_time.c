@@ -32,7 +32,7 @@
 
 static cycle_t uv_read_rtc(struct clocksource *cs);
 static int uv_rtc_next_event(unsigned long, struct clock_event_device *);
-static void uv_rtc_timer_setup(enum clock_event_mode,
+static int uv_rtc_timer_setup(enum clock_event_mode,
 				struct clock_event_device *);
 
 static struct clocksource clocksource_uv = {
@@ -50,7 +50,7 @@ static struct clock_event_device clock_event_device_uv = {
 	.rating		= 400,
 	.irq		= -1,
 	.set_next_event	= uv_rtc_next_event,
-	.set_mode	= uv_rtc_timer_setup,
+	.set_dev_mode	= uv_rtc_timer_setup,
 	.event_handler	= NULL,
 };
 
@@ -323,7 +323,7 @@ static int uv_rtc_next_event(unsigned long delta,
 /*
  * Setup the RTC timer in oneshot mode
  */
-static void uv_rtc_timer_setup(enum clock_event_mode mode,
+static int uv_rtc_timer_setup(enum clock_event_mode mode,
 			       struct clock_event_device *evt)
 {
 	int ced_cpu = cpumask_first(evt->cpumask);
@@ -338,7 +338,10 @@ static void uv_rtc_timer_setup(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 		uv_rtc_unset_timer(ced_cpu, 1);
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static void uv_rtc_interrupt(void)

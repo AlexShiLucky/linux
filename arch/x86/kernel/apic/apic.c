@@ -488,7 +488,7 @@ static int lapic_next_deadline(unsigned long delta,
 /*
  * Setup the lapic timer in periodic or oneshot mode
  */
-static void lapic_timer_setup(enum clock_event_mode mode,
+static int lapic_timer_setup(enum clock_event_mode mode,
 			      struct clock_event_device *evt)
 {
 	unsigned long flags;
@@ -496,7 +496,7 @@ static void lapic_timer_setup(enum clock_event_mode mode,
 
 	/* Lapic used as dummy for broadcast ? */
 	if (evt->features & CLOCK_EVT_FEAT_DUMMY)
-		return;
+		return 0;
 
 	local_irq_save(flags);
 
@@ -516,9 +516,13 @@ static void lapic_timer_setup(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		/* Nothing to do here */
 		break;
+	default:
+		local_irq_restore(flags);
+		return -ENOSYS;
 	}
 
 	local_irq_restore(flags);
+	return 0;
 }
 
 /*
@@ -540,7 +544,7 @@ static struct clock_event_device lapic_clockevent = {
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT
 			| CLOCK_EVT_FEAT_C3STOP | CLOCK_EVT_FEAT_DUMMY,
 	.shift		= 32,
-	.set_mode	= lapic_timer_setup,
+	.set_dev_mode	= lapic_timer_setup,
 	.set_next_event	= lapic_next_event,
 	.broadcast	= lapic_timer_broadcast,
 	.rating		= 100,
