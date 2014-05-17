@@ -128,25 +128,31 @@ static int kona_timer_set_next_event(unsigned long clc,
 	return 0;
 }
 
-static void kona_timer_set_mode(enum clock_event_mode mode,
+static int kona_timer_set_mode(enum clock_event_mode mode,
 			     struct clock_event_device *unused)
 {
+	int ret = 0;
+
 	switch (mode) {
 	case CLOCK_EVT_MODE_ONESHOT:
 		/* by default mode is one shot don't do any thing */
 		break;
+	default:
+		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
-	default:
+	case CLOCK_EVT_MODE_RESUME:
 		kona_timer_disable_and_clear(timers.tmr_regs);
+		break;
 	}
+	return ret;
 }
 
 static struct clock_event_device kona_clockevent_timer = {
 	.name = "timer 1",
 	.features = CLOCK_EVT_FEAT_ONESHOT,
 	.set_next_event = kona_timer_set_next_event,
-	.set_mode = kona_timer_set_mode
+	.set_dev_mode = kona_timer_set_mode
 };
 
 static void __init kona_timer_clockevents_init(void)

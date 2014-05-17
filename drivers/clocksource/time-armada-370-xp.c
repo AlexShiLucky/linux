@@ -126,12 +126,14 @@ armada_370_xp_clkevt_next_event(unsigned long delta,
 	return 0;
 }
 
-static void
+static int
 armada_370_xp_clkevt_mode(enum clock_event_mode mode,
 			  struct clock_event_device *dev)
 {
-	if (mode == CLOCK_EVT_MODE_PERIODIC) {
+	int ret = 0;
 
+	switch (mode) {
+	case CLOCK_EVT_MODE_PERIODIC:
 		/*
 		 * Setup timer to fire at 1/HZ intervals.
 		 */
@@ -142,7 +144,13 @@ armada_370_xp_clkevt_mode(enum clock_event_mode mode,
 		 * Enable timer.
 		 */
 		local_timer_ctrl_clrset(0, TIMER0_RELOAD_EN | enable_mask);
-	} else {
+		break;
+	default:
+		ret = -ENOSYS;
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 		/*
 		 * Disable timer.
 		 */
@@ -152,7 +160,9 @@ armada_370_xp_clkevt_mode(enum clock_event_mode mode,
 		 * ACK pending timer interrupt.
 		 */
 		writel(TIMER0_CLR_MASK, local_base + LCL_TIMER_EVENTS_STATUS);
+		break;
 	}
+	return ret;
 }
 
 static int armada_370_xp_clkevt_irq;
@@ -190,7 +200,7 @@ static int armada_370_xp_timer_setup(struct clock_event_device *evt)
 	evt->shift		= 32,
 	evt->rating		= 300,
 	evt->set_next_event	= armada_370_xp_clkevt_next_event,
-	evt->set_mode		= armada_370_xp_clkevt_mode,
+	evt->set_dev_mode	= armada_370_xp_clkevt_mode,
 	evt->irq		= armada_370_xp_clkevt_irq;
 	evt->cpumask		= cpumask_of(cpu);
 
@@ -202,7 +212,7 @@ static int armada_370_xp_timer_setup(struct clock_event_device *evt)
 
 static void armada_370_xp_timer_stop(struct clock_event_device *evt)
 {
-	evt->set_mode(CLOCK_EVT_MODE_UNUSED, evt);
+	evt->set_dev_mode(CLOCK_EVT_MODE_UNUSED, evt);
 	disable_percpu_irq(evt->irq);
 }
 
