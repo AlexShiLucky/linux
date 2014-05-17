@@ -264,7 +264,7 @@ static u64 notrace clps711x_sched_clock_read(void)
 	return ~readw_relaxed(CLPS711X_VIRT_BASE + TC1D);
 }
 
-static void clps711x_clockevent_set_mode(enum clock_event_mode mode,
+static int clps711x_clockevent_set_mode(enum clock_event_mode mode,
 					 struct clock_event_device *evt)
 {
 	disable_irq(IRQ_TC2OI);
@@ -280,14 +280,17 @@ static void clps711x_clockevent_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		/* Left event sources disabled, no more interrupts appear */
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device clockevent_clps711x = {
 	.name		= "clps711x-clockevent",
 	.rating		= 300,
 	.features	= CLOCK_EVT_FEAT_PERIODIC,
-	.set_mode	= clps711x_clockevent_set_mode,
+	.set_dev_mode	= clps711x_clockevent_set_mode,
 };
 
 static irqreturn_t clps711x_timer_interrupt(int irq, void *dev_id)

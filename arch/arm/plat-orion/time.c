@@ -106,14 +106,16 @@ orion_clkevt_next_event(unsigned long delta, struct clock_event_device *dev)
 	return 0;
 }
 
-static void
+static int
 orion_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 {
 	unsigned long flags;
+	int ret = 0;
 	u32 u;
 
 	local_irq_save(flags);
-	if (mode == CLOCK_EVT_MODE_PERIODIC) {
+	switch (mode) {
+	case CLOCK_EVT_MODE_PERIODIC:
 		/*
 		 * Setup timer to fire at 1/HZ intervals.
 		 */
@@ -132,7 +134,14 @@ orion_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 		u = readl(timer_base + TIMER_CTRL_OFF);
 		writel(u | TIMER1_EN | TIMER1_RELOAD_EN,
 		       timer_base + TIMER_CTRL_OFF);
-	} else {
+		break;
+
+	default:
+		ret = -ENOSYS;
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 		/*
 		 * Disable timer.
 		 */
@@ -149,9 +158,10 @@ orion_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 		 * ACK pending timer interrupt.
 		 */
 		writel(bridge_timer1_clr_mask, bridge_base + BRIDGE_CAUSE_OFF);
-
+		break;
 	}
 	local_irq_restore(flags);
+	return ret;
 }
 
 static struct clock_event_device orion_clkevt = {
@@ -159,7 +169,7 @@ static struct clock_event_device orion_clkevt = {
 	.features	= CLOCK_EVT_FEAT_ONESHOT | CLOCK_EVT_FEAT_PERIODIC,
 	.rating		= 300,
 	.set_next_event	= orion_clkevt_next_event,
-	.set_mode	= orion_clkevt_mode,
+	.set_dev_mode	= orion_clkevt_mode,
 };
 
 static irqreturn_t orion_timer_interrupt(int irq, void *dev_id)

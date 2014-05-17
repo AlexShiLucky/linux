@@ -106,7 +106,7 @@ static int epit_set_next_event(unsigned long evt,
 	return 0;
 }
 
-static void epit_set_mode(enum clock_event_mode mode,
+static int epit_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	unsigned long flags;
@@ -152,7 +152,10 @@ static void epit_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		/* Left event sources disabled, no more interrupts appear */
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 /*
@@ -178,7 +181,7 @@ static struct irqaction epit_timer_irq = {
 static struct clock_event_device clockevent_epit = {
 	.name		= "epit",
 	.features	= CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= epit_set_mode,
+	.set_dev_mode	= epit_set_mode,
 	.set_next_event	= epit_set_next_event,
 	.rating		= 200,
 };

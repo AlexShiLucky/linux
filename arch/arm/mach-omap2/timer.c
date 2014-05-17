@@ -101,7 +101,7 @@ static int omap2_gp_timer_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void omap2_gp_timer_set_mode(enum clock_event_mode mode,
+static int omap2_gp_timer_set_mode(enum clock_event_mode mode,
 				    struct clock_event_device *evt)
 {
 	u32 period;
@@ -125,14 +125,17 @@ static void omap2_gp_timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device clockevent_gpt = {
 	.features       = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.rating		= 300,
 	.set_next_event	= omap2_gp_timer_set_next_event,
-	.set_mode	= omap2_gp_timer_set_mode,
+	.set_dev_mode	= omap2_gp_timer_set_mode,
 };
 
 static struct property device_disabled = {

@@ -82,7 +82,7 @@ static struct irqaction at91sam926x_pit_irq;
 /*
  * Clockevent device:  interrupts every 1/HZ (== pit_cycles * MCK/16)
  */
-static void
+static int
 pit_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 {
 	switch (mode) {
@@ -105,7 +105,11 @@ pit_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 		break;
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+
+	return 0;
 }
 
 static void at91sam926x_pit_suspend(struct clock_event_device *cedev)
@@ -137,7 +141,7 @@ static struct clock_event_device pit_clkevt = {
 	.features	= CLOCK_EVT_FEAT_PERIODIC,
 	.shift		= 32,
 	.rating		= 100,
-	.set_mode	= pit_clkevt_mode,
+	.set_dev_mode	= pit_clkevt_mode,
 	.suspend	= at91sam926x_pit_suspend,
 	.resume		= at91sam926x_pit_resume,
 };

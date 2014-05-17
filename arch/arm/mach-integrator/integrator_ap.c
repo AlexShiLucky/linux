@@ -308,7 +308,7 @@ static irqreturn_t integrator_timer_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-static void clkevt_set_mode(enum clock_event_mode mode, struct clock_event_device *evt)
+static int clkevt_set_mode(enum clock_event_mode mode, struct clock_event_device *evt)
 {
 	u32 ctrl = readl(clkevt_base + TIMER_CTRL) & ~TIMER_CTRL_ENABLE;
 
@@ -330,11 +330,12 @@ static void clkevt_set_mode(enum clock_event_mode mode, struct clock_event_devic
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
-	default:
 		/* Just leave in disabled state */
 		break;
+	default:
+		return -ENOSYS;
 	}
-
+	return 0;
 }
 
 static int clkevt_set_next_event(unsigned long next, struct clock_event_device *evt)
@@ -351,7 +352,7 @@ static int clkevt_set_next_event(unsigned long next, struct clock_event_device *
 static struct clock_event_device integrator_clockevent = {
 	.name		= "timer1",
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= clkevt_set_mode,
+	.set_dev_mode	= clkevt_set_mode,
 	.set_next_event	= clkevt_set_next_event,
 	.rating		= 300,
 };

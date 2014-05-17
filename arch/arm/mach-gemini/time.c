@@ -59,7 +59,7 @@ static int gemini_timer_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void gemini_timer_set_mode(enum clock_event_mode mode,
+static int gemini_timer_set_mode(enum clock_event_mode mode,
 				  struct clock_event_device *evt)
 {
 	u32 period = DIV_ROUND_CLOSEST(tick_rate, HZ);
@@ -91,8 +91,9 @@ static void gemini_timer_set_mode(enum clock_event_mode mode,
 		writel(cr, TIMER_CR(IO_ADDRESS(GEMINI_TIMER_BASE)));
 		break;
 	default:
-                break;
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 /* Use TIMER2 as clock event */
@@ -101,7 +102,7 @@ static struct clock_event_device gemini_clockevent = {
 	.rating		= 300, /* Reasonably fast and accurate clock event */
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.set_next_event	= gemini_timer_set_next_event,
-	.set_mode	= gemini_timer_set_mode,
+	.set_dev_mode	= gemini_timer_set_mode,
 };
 
 /*

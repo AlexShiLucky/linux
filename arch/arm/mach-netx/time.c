@@ -31,10 +31,11 @@
 #define TIMER_CLOCKEVENT 0
 #define TIMER_CLOCKSOURCE 1
 
-static void netx_set_mode(enum clock_event_mode mode,
+static int netx_set_mode(enum clock_event_mode mode,
 		struct clock_event_device *clk)
 {
 	u32 tmode;
+	int ret = 0;
 
 	/* disable timer */
 	writel(0, NETX_GPIO_COUNTER_CTRL(TIMER_CLOCKEVENT));
@@ -54,9 +55,8 @@ static void netx_set_mode(enum clock_event_mode mode,
 		break;
 
 	default:
-		WARN(1, "%s: unhandled mode %d\n", __func__, mode);
+		ret = -ENOSYS;
 		/* fall through */
-
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_RESUME:
@@ -65,6 +65,7 @@ static void netx_set_mode(enum clock_event_mode mode,
 	}
 
 	writel(tmode, NETX_GPIO_COUNTER_CTRL(TIMER_CLOCKEVENT));
+	return ret;
 }
 
 static int netx_set_next_event(unsigned long evt,
@@ -78,7 +79,7 @@ static struct clock_event_device netx_clockevent = {
 	.name = "netx-timer" __stringify(TIMER_CLOCKEVENT),
 	.features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.set_next_event = netx_set_next_event,
-	.set_mode = netx_set_mode,
+	.set_dev_mode = netx_set_mode,
 };
 
 /*

@@ -512,11 +512,12 @@ static int ixp4xx_set_next_event(unsigned long evt,
 	return 0;
 }
 
-static void ixp4xx_set_mode(enum clock_event_mode mode,
+static int ixp4xx_set_mode(enum clock_event_mode mode,
 			    struct clock_event_device *evt)
 {
 	unsigned long opts = *IXP4XX_OSRT1 & IXP4XX_OST_RELOAD_MASK;
 	unsigned long osrt = *IXP4XX_OSRT1 & ~IXP4XX_OST_RELOAD_MASK;
+	int ret = 0;
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
@@ -534,20 +535,22 @@ static void ixp4xx_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		opts |= IXP4XX_OST_ENABLE;
 		break;
-	case CLOCK_EVT_MODE_UNUSED:
 	default:
+		ret = -ENOSYS;
+	case CLOCK_EVT_MODE_UNUSED:
 		osrt = opts = 0;
 		break;
 	}
 
 	*IXP4XX_OSRT1 = osrt | opts;
+	return ret;
 }
 
 static struct clock_event_device clockevent_ixp4xx = {
 	.name		= "ixp4xx timer1",
 	.features       = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.rating         = 200,
-	.set_mode	= ixp4xx_set_mode,
+	.set_dev_mode	= ixp4xx_set_mode,
 	.set_next_event	= ixp4xx_set_next_event,
 };
 
