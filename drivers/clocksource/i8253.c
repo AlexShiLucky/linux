@@ -105,7 +105,7 @@ int __init clocksource_i8253_init(void)
  *
  * This is also called after resume to bring the PIT into operation again.
  */
-static void init_pit_timer(enum clock_event_mode mode,
+static int init_pit_timer(enum clock_event_mode mode,
 			   struct clock_event_device *evt)
 {
 	raw_spin_lock(&i8253_lock);
@@ -136,8 +136,12 @@ static void init_pit_timer(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		/* Nothing to do here */
 		break;
+	default:
+		raw_spin_unlock(&i8253_lock);
+		return -ENOSYS;
 	}
 	raw_spin_unlock(&i8253_lock);
+	return 0;
 }
 
 /*
@@ -162,7 +166,7 @@ static int pit_next_event(unsigned long delta, struct clock_event_device *evt)
 struct clock_event_device i8253_clockevent = {
 	.name		= "pit",
 	.features	= CLOCK_EVT_FEAT_PERIODIC,
-	.set_mode	= init_pit_timer,
+	.set_dev_mode	= init_pit_timer,
 	.set_next_event = pit_next_event,
 };
 
