@@ -118,24 +118,27 @@ static int timer_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void timer_set_mode(enum clock_event_mode mode,
+static int timer_set_mode(enum clock_event_mode mode,
 			   struct clock_event_device *dev)
 {
 	unsigned long flags;
 
-	local_irq_save(flags);
 	switch (mode) {
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 		/* disable the matching interrupt */
+		local_irq_save(flags);
 		__raw_writel(0x00, mmp_timer_base + TMR_IER(0));
+		local_irq_restore(flags);
 		break;
 	case CLOCK_EVT_MODE_RESUME:
 	case CLOCK_EVT_MODE_PERIODIC:
 		break;
+	default:
+		return -ENOSYS;
 	}
-	local_irq_restore(flags);
+	return 0;
 }
 
 static struct clock_event_device ckevt = {
@@ -143,7 +146,7 @@ static struct clock_event_device ckevt = {
 	.features	= CLOCK_EVT_FEAT_ONESHOT,
 	.rating		= 200,
 	.set_next_event	= timer_set_next_event,
-	.set_mode	= timer_set_mode,
+	.set_dev_mode	= timer_set_mode,
 };
 
 static cycle_t clksrc_read(struct clocksource *cs)

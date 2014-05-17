@@ -66,7 +66,7 @@
 static __iomem void *gpt_base;
 static struct clk *gpt_clk;
 
-static void clockevent_set_mode(enum clock_event_mode mode,
+static int clockevent_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *clk_event_dev);
 static int clockevent_next_event(unsigned long evt,
 				 struct clock_event_device *clk_event_dev);
@@ -98,12 +98,12 @@ static void spear_clocksource_init(void)
 static struct clock_event_device clkevt = {
 	.name = "tmr0",
 	.features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode = clockevent_set_mode,
+	.set_dev_mode = clockevent_set_mode,
 	.set_next_event = clockevent_next_event,
 	.shift = 0,	/* to be computed */
 };
 
-static void clockevent_set_mode(enum clock_event_mode mode,
+static int clockevent_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *clk_event_dev)
 {
 	u32 period;
@@ -138,9 +138,9 @@ static void clockevent_set_mode(enum clock_event_mode mode,
 
 		break;
 	default:
-		pr_err("Invalid mode requested\n");
-		break;
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int clockevent_next_event(unsigned long cycles,

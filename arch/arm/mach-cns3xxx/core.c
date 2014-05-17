@@ -81,12 +81,12 @@ void cns3xxx_power_off(void)
  */
 static void __iomem *cns3xxx_tmr1;
 
-static void cns3xxx_timer_set_mode(enum clock_event_mode mode,
+static int cns3xxx_timer_set_mode(enum clock_event_mode mode,
 				   struct clock_event_device *clk)
 {
 	unsigned long ctrl = readl(cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 	int pclk = cns3xxx_cpu_clock() / 8;
-	int reload;
+	int reload, ret = 0;
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
@@ -98,13 +98,17 @@ static void cns3xxx_timer_set_mode(enum clock_event_mode mode,
 		/* period set, and timer enabled in 'next_event' hook */
 		ctrl |= (1 << 2) | (1 << 9);
 		break;
+	default:
+		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
-	default:
+	case CLOCK_EVT_MODE_RESUME:
 		ctrl = 0;
+		break;
 	}
 
 	writel(ctrl, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
+	return ret;
 }
 
 static int cns3xxx_timer_set_next_event(unsigned long evt,
@@ -121,7 +125,7 @@ static int cns3xxx_timer_set_next_event(unsigned long evt,
 static struct clock_event_device cns3xxx_tmr1_clockevent = {
 	.name		= "cns3xxx timer1",
 	.features       = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= cns3xxx_timer_set_mode,
+	.set_dev_mode	= cns3xxx_timer_set_mode,
 	.set_next_event	= cns3xxx_timer_set_next_event,
 	.rating		= 350,
 	.cpumask	= cpu_all_mask,

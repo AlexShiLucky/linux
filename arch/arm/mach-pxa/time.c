@@ -67,7 +67,7 @@ pxa_osmr0_set_next_event(unsigned long delta, struct clock_event_device *dev)
 	return (signed)(next - oscr) <= MIN_OSCR_DELTA ? -ETIME : 0;
 }
 
-static void
+static int
 pxa_osmr0_set_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 {
 	switch (mode) {
@@ -86,7 +86,10 @@ pxa_osmr0_set_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 	case CLOCK_EVT_MODE_RESUME:
 	case CLOCK_EVT_MODE_PERIODIC:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 #ifdef CONFIG_PM
@@ -130,7 +133,7 @@ static struct clock_event_device ckevt_pxa_osmr0 = {
 	.features	= CLOCK_EVT_FEAT_ONESHOT,
 	.rating		= 200,
 	.set_next_event	= pxa_osmr0_set_next_event,
-	.set_mode	= pxa_osmr0_set_mode,
+	.set_dev_mode	= pxa_osmr0_set_mode,
 	.suspend	= pxa_timer_suspend,
 	.resume		= pxa_timer_resume,
 };

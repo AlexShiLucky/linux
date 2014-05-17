@@ -43,7 +43,7 @@ static int lpc32xx_clkevt_next_event(unsigned long delta,
 	return 0;
 }
 
-static void lpc32xx_clkevt_mode(enum clock_event_mode mode,
+static int lpc32xx_clkevt_mode(enum clock_event_mode mode,
     struct clock_event_device *dev)
 {
 	switch (mode) {
@@ -64,7 +64,10 @@ static void lpc32xx_clkevt_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device lpc32xx_clkevt = {
@@ -72,7 +75,7 @@ static struct clock_event_device lpc32xx_clkevt = {
 	.features	= CLOCK_EVT_FEAT_ONESHOT,
 	.rating		= 300,
 	.set_next_event	= lpc32xx_clkevt_next_event,
-	.set_mode	= lpc32xx_clkevt_mode,
+	.set_dev_mode	= lpc32xx_clkevt_mode,
 };
 
 static irqreturn_t lpc32xx_timer_interrupt(int irq, void *dev_id)

@@ -54,14 +54,15 @@
 /* Timer0 Timeout Counter Register */
 #define T0TC_WATCHDOG		(0xff)		/* Enable watchdog mode */
 
-static void ks8695_set_mode(enum clock_event_mode mode,
+static int ks8695_set_mode(enum clock_event_mode mode,
 			    struct clock_event_device *evt)
 {
-	u32 tmcon;
+	u32 tmcon, rate, half;
 
-	if (mode == CLOCK_EVT_FEAT_PERIODIC) {
-		u32 rate = DIV_ROUND_CLOSEST(KS8695_CLOCK_RATE, HZ);
-		u32 half = DIV_ROUND_CLOSEST(rate, 2);
+	switch (mode) {
+	case CLOCK_EVT_MODE_PERIODIC:
+		rate = DIV_ROUND_CLOSEST(KS8695_CLOCK_RATE, HZ);
+		half = DIV_ROUND_CLOSEST(rate, 2);
 
 		/* Disable timer 1 */
 		tmcon = readl_relaxed(KS8695_TMR_VA + KS8695_TMCON);
@@ -75,7 +76,16 @@ static void ks8695_set_mode(enum clock_event_mode mode,
 		/* Re-enable timer1 */
 		tmcon |= TMCON_T1EN;
 		writel_relaxed(tmcon, KS8695_TMR_VA + KS8695_TMCON);
+		break;
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
+	case CLOCK_EVT_MODE_UNUSED:
+		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int ks8695_set_next_event(unsigned long cycles,
@@ -106,7 +116,7 @@ static struct clock_event_device clockevent_ks8695 = {
 	.rating		= 300, /* Reasonably fast and accurate clock event */
 	.features	= CLOCK_EVT_FEAT_ONESHOT | CLOCK_EVT_FEAT_PERIODIC,
 	.set_next_event	= ks8695_set_next_event,
-	.set_mode	= ks8695_set_mode,
+	.set_dev_mode	= ks8695_set_mode,
 };
 
 /*

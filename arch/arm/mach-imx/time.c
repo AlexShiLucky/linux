@@ -167,7 +167,7 @@ static const char *clock_event_mode_label[] = {
 };
 #endif /* DEBUG */
 
-static void mxc_set_mode(enum clock_event_mode mode,
+static int mxc_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	unsigned long flags;
@@ -225,7 +225,10 @@ static void mxc_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		/* Left event sources disabled, no more interrupts appear */
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 /*
@@ -257,7 +260,7 @@ static struct irqaction mxc_timer_irq = {
 static struct clock_event_device clockevent_mxc = {
 	.name		= "mxc_timer1",
 	.features	= CLOCK_EVT_FEAT_ONESHOT,
-	.set_mode	= mxc_set_mode,
+	.set_dev_mode	= mxc_set_mode,
 	.set_next_event	= mx1_2_set_next_event,
 	.rating		= 200,
 };

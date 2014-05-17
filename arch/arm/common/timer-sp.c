@@ -127,10 +127,11 @@ static irqreturn_t sp804_timer_interrupt(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-static void sp804_set_mode(enum clock_event_mode mode,
+static int sp804_set_mode(enum clock_event_mode mode,
 	struct clock_event_device *evt)
 {
 	unsigned long ctrl = TIMER_CTRL_32BIT | TIMER_CTRL_IE;
+	int ret = 0;
 
 	writel(ctrl, clkevt_base + TIMER_CTRL);
 
@@ -147,11 +148,14 @@ static void sp804_set_mode(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
-	default:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		ret = -ENOSYS;
 	}
 
 	writel(ctrl, clkevt_base + TIMER_CTRL);
+	return ret;
 }
 
 static int sp804_set_next_event(unsigned long next,
@@ -168,7 +172,7 @@ static int sp804_set_next_event(unsigned long next,
 static struct clock_event_device sp804_clockevent = {
 	.features       = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT |
 		CLOCK_EVT_FEAT_DYNIRQ,
-	.set_mode	= sp804_set_mode,
+	.set_dev_mode	= sp804_set_mode,
 	.set_next_event	= sp804_set_next_event,
 	.rating		= 300,
 };

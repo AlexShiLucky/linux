@@ -57,7 +57,7 @@ static int ckevt_dc21285_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void ckevt_dc21285_set_mode(enum clock_event_mode mode,
+static int ckevt_dc21285_set_mode(enum clock_event_mode mode,
 	struct clock_event_device *c)
 {
 	switch (mode) {
@@ -74,7 +74,10 @@ static void ckevt_dc21285_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 		*CSR_TIMER1_CNTL = 0;
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device ckevt_dc21285 = {
@@ -84,7 +87,7 @@ static struct clock_event_device ckevt_dc21285 = {
 	.rating		= 200,
 	.irq		= IRQ_TIMER1,
 	.set_next_event	= ckevt_dc21285_set_next_event,
-	.set_mode	= ckevt_dc21285_set_mode,
+	.set_dev_mode	= ckevt_dc21285_set_mode,
 };
 
 static irqreturn_t timer1_interrupt(int irq, void *dev_id)

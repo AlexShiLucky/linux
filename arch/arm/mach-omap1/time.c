@@ -124,7 +124,7 @@ static int omap_mpu_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void omap_mpu_set_mode(enum clock_event_mode mode,
+static int omap_mpu_set_mode(enum clock_event_mode mode,
 			      struct clock_event_device *evt)
 {
 	switch (mode) {
@@ -139,14 +139,17 @@ static void omap_mpu_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device clockevent_mpu_timer1 = {
 	.name		= "mpu_timer1",
 	.features       = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.set_next_event	= omap_mpu_set_next_event,
-	.set_mode	= omap_mpu_set_mode,
+	.set_dev_mode	= omap_mpu_set_mode,
 };
 
 static irqreturn_t omap_mpu_timer1_interrupt(int irq, void *dev_id)

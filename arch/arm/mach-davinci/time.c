@@ -303,7 +303,7 @@ static int davinci_set_next_event(unsigned long cycles,
 	return 0;
 }
 
-static void davinci_set_mode(enum clock_event_mode mode,
+static int davinci_set_mode(enum clock_event_mode mode,
 			     struct clock_event_device *evt)
 {
 	struct timer_s *t = &timers[TID_CLOCKEVENT];
@@ -326,13 +326,16 @@ static void davinci_set_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static struct clock_event_device clockevent_davinci = {
 	.features       = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.set_next_event	= davinci_set_next_event,
-	.set_mode	= davinci_set_mode,
+	.set_dev_mode	= davinci_set_mode,
 };
 
 

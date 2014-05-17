@@ -36,10 +36,11 @@ static DEFINE_PER_CPU(bool, percpu_setup_called);
 static struct clock_event_device __percpu *twd_evt;
 static int twd_ppi;
 
-static void twd_set_mode(enum clock_event_mode mode,
+static int twd_set_mode(enum clock_event_mode mode,
 			struct clock_event_device *clk)
 {
 	unsigned long ctrl;
+	int ret = 0;
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
@@ -52,13 +53,17 @@ static void twd_set_mode(enum clock_event_mode mode,
 		/* period set, and timer enabled in 'next_event' hook */
 		ctrl = TWD_TIMER_CONTROL_IT_ENABLE | TWD_TIMER_CONTROL_ONESHOT;
 		break;
+	default:
+		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
-	default:
+	case CLOCK_EVT_MODE_RESUME:
 		ctrl = 0;
+		break;
 	}
 
 	writel_relaxed(ctrl, twd_base + TWD_TIMER_CONTROL);
+	return ret;
 }
 
 static int twd_set_next_event(unsigned long evt,
@@ -296,7 +301,7 @@ static void twd_timer_setup(void)
 	clk->features = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT |
 			CLOCK_EVT_FEAT_C3STOP;
 	clk->rating = 350;
-	clk->set_mode = twd_set_mode;
+	clk->set_dev_mode = twd_set_mode;
 	clk->set_next_event = twd_set_next_event;
 	clk->irq = twd_ppi;
 	clk->cpumask = cpumask_of(cpu);

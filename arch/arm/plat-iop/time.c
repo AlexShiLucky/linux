@@ -77,10 +77,11 @@ static int iop_set_next_event(unsigned long delta,
 
 static unsigned long ticks_per_jiffy;
 
-static void iop_set_mode(enum clock_event_mode mode,
+static int iop_set_mode(enum clock_event_mode mode,
 			 struct clock_event_device *unused)
 {
 	u32 tmr = read_tmr0();
+	int ret = 0;
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
@@ -96,14 +97,16 @@ static void iop_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		tmr |= IOP_TMR_EN;
 		break;
+	default:
+		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
-	default:
 		tmr &= ~IOP_TMR_EN;
 		break;
 	}
 
 	write_tmr0(tmr);
+	return ret;
 }
 
 static struct clock_event_device iop_clockevent = {
@@ -111,7 +114,7 @@ static struct clock_event_device iop_clockevent = {
 	.features       = CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.rating         = 300,
 	.set_next_event	= iop_set_next_event,
-	.set_mode	= iop_set_mode,
+	.set_dev_mode	= iop_set_mode,
 };
 
 static irqreturn_t

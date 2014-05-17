@@ -111,9 +111,11 @@ static struct clocksource clk32k = {
 	.flags		= CLOCK_SOURCE_IS_CONTINUOUS,
 };
 
-static void
+static int
 clkevt32k_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 {
+	int ret = 0;
+
 	/* Disable and flush pending timer interrupts */
 	at91_st_write(AT91_ST_IDR, AT91_ST_PITS | AT91_ST_ALMS);
 	at91_st_read(AT91_ST_SR);
@@ -137,8 +139,11 @@ clkevt32k_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 	case CLOCK_EVT_MODE_RESUME:
 		irqmask = 0;
 		break;
+	default:
+		ret = -ENOSYS;
 	}
 	at91_st_write(AT91_ST_IER, irqmask);
+	return ret;
 }
 
 static int
@@ -176,7 +181,7 @@ static struct clock_event_device clkevt = {
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.rating		= 150,
 	.set_next_event	= clkevt32k_next_event,
-	.set_mode	= clkevt32k_mode,
+	.set_dev_mode	= clkevt32k_mode,
 };
 
 void __iomem *at91_st_base;
