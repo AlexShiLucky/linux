@@ -38,10 +38,20 @@ static int mips_next_event(unsigned long delta,
 
 #endif /* CONFIG_MIPS_MT_SMTC */
 
-void mips_set_clock_mode(enum clock_event_mode mode,
+int mips_set_clock_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
-	/* Nothing to do ...  */
+	switch (mode) {
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
+        /* Nothing to do ...  */
+		break;
+	default:
+		return -ENOSYS;
+	}
+	return 0;
 }
 
 DEFINE_PER_CPU(struct clock_event_device, mips_clockevent_device);
@@ -207,7 +217,7 @@ int r4k_clockevent_init(void)
 	cd->irq			= irq;
 	cd->cpumask		= cpumask_of(cpu);
 	cd->set_next_event	= mips_next_event;
-	cd->set_mode		= mips_set_clock_mode;
+	cd->set_dev_mode	= mips_set_clock_mode;
 	cd->event_handler	= mips_event_handler;
 
 #ifdef CONFIG_CEVT_GIC

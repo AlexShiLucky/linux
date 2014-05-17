@@ -40,7 +40,7 @@
  * The general purpose timer ticks at 1MHz independent if
  * the rest of the system
  */
-static void sibyte_set_mode(enum clock_event_mode mode,
+static int sibyte_set_mode(enum clock_event_mode mode,
 			   struct clock_event_device *evt)
 {
 	unsigned int cpu = smp_processor_id();
@@ -65,8 +65,11 @@ static void sibyte_set_mode(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_UNUSED:	/* shuddup gcc */
 	case CLOCK_EVT_MODE_RESUME:
-		;
+		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static int sibyte_next_event(unsigned long delta, struct clock_event_device *cd)
@@ -130,7 +133,7 @@ void sb1480_clockevent_init(void)
 	cd->irq			= irq;
 	cd->cpumask		= cpumask_of(cpu);
 	cd->set_next_event	= sibyte_next_event;
-	cd->set_mode		= sibyte_set_mode;
+	cd->set_dev_mode	= sibyte_set_mode;
 	clockevents_register_device(cd);
 
 	bcm1480_mask_irq(cpu, irq);

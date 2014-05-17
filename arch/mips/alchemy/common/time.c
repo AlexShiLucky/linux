@@ -70,9 +70,19 @@ static int au1x_rtcmatch2_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void au1x_rtcmatch2_set_mode(enum clock_event_mode mode,
+static int au1x_rtcmatch2_set_mode(enum clock_event_mode mode,
 				    struct clock_event_device *cd)
 {
+	switch (mode) {
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
+		break;
+	default:
+		return -ENOSYS;
+	}
+	return 0;
 }
 
 static irqreturn_t au1x_rtcmatch2_irq(int irq, void *dev_id)
@@ -87,7 +97,7 @@ static struct clock_event_device au1x_rtcmatch2_clockdev = {
 	.features	= CLOCK_EVT_FEAT_ONESHOT,
 	.rating		= 1500,
 	.set_next_event = au1x_rtcmatch2_set_next_event,
-	.set_mode	= au1x_rtcmatch2_set_mode,
+	.set_dev_mode	= au1x_rtcmatch2_set_mode,
 	.cpumask	= cpu_all_mask,
 };
 

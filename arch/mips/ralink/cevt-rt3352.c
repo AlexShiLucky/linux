@@ -36,7 +36,7 @@ struct systick_device {
 	int freq_scale;
 };
 
-static void systick_set_clock_mode(enum clock_event_mode mode,
+static int systick_set_clock_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt);
 
 static int systick_next_event(unsigned long delta,
@@ -76,7 +76,7 @@ static struct systick_device systick = {
 		.rating		= 310,
 		.features	= CLOCK_EVT_FEAT_ONESHOT,
 		.set_next_event	= systick_next_event,
-		.set_mode	= systick_set_clock_mode,
+		.set_dev_mode	= systick_set_clock_mode,
 		.event_handler	= systick_event_handler,
 	},
 };
@@ -87,7 +87,7 @@ static struct irqaction systick_irqaction = {
 	.dev_id = &systick.dev,
 };
 
-static void systick_set_clock_mode(enum clock_event_mode mode,
+static int systick_set_clock_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
 	struct systick_device *sdev;
@@ -110,10 +110,14 @@ static void systick_set_clock_mode(enum clock_event_mode mode,
 		iowrite32(0, systick.membase + SYSTICK_CONFIG);
 		break;
 
-	default:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_RESUME:
 		pr_err("%s: Unhandeled mips clock_mode\n", systick.dev.name);
 		break;
+	default:
+		return -ENOSYS;
 	}
+	return 0;
 }
 
 static void __init ralink_systick_init(struct device_node *np)

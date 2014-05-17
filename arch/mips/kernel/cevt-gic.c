@@ -31,10 +31,20 @@ static int gic_next_event(unsigned long delta, struct clock_event_device *evt)
 	return res;
 }
 
-void gic_set_clock_mode(enum clock_event_mode mode,
+int gic_set_clock_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
+	switch (mode) {
+	case CLOCK_EVT_MODE_ONESHOT:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 	/* Nothing to do ...  */
+		break;
+	default:
+		return -ENOSYS;
+	}
+	return 0;
 }
 
 irqreturn_t gic_compare_interrupt(int irq, void *dev_id)
@@ -85,7 +95,7 @@ int gic_clockevent_init(void)
 	cd->irq			= irq;
 	cd->cpumask		= cpumask_of(cpu);
 	cd->set_next_event	= gic_next_event;
-	cd->set_mode		= gic_set_clock_mode;
+	cd->set_dev_mode	= gic_set_clock_mode;
 	cd->event_handler	= gic_event_handler;
 
 	clockevents_register_device(cd);

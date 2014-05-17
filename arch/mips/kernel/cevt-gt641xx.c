@@ -64,10 +64,11 @@ static int gt641xx_timer0_set_next_event(unsigned long delta,
 	return 0;
 }
 
-static void gt641xx_timer0_set_mode(enum clock_event_mode mode,
+static int gt641xx_timer0_set_mode(enum clock_event_mode mode,
 				    struct clock_event_device *evt)
 {
 	u32 ctrl;
+	int ret = 0;
 
 	raw_spin_lock(&gt641xx_timer_lock);
 
@@ -81,13 +82,18 @@ static void gt641xx_timer0_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_ONESHOT:
 		ctrl |= GT_TC_CONTROL_ENTC0_MSK;
 		break;
-	default:
+	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_RESUME:
 		break;
+	default:
+		ret = -ENOSYS;
 	}
 
 	GT_WRITE(GT_TC_CONTROL_OFS, ctrl);
 
 	raw_spin_unlock(&gt641xx_timer_lock);
+	return ret;
 }
 
 static void gt641xx_timer0_event_handler(struct clock_event_device *dev)
@@ -99,7 +105,7 @@ static struct clock_event_device gt641xx_timer0_clockevent = {
 	.features	= CLOCK_EVT_FEAT_PERIODIC | CLOCK_EVT_FEAT_ONESHOT,
 	.irq		= GT641XX_TIMER0_IRQ,
 	.set_next_event = gt641xx_timer0_set_next_event,
-	.set_mode	= gt641xx_timer0_set_mode,
+	.set_dev_mode	= gt641xx_timer0_set_mode,
 	.event_handler	= gt641xx_timer0_event_handler,
 };
 

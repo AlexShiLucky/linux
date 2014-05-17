@@ -52,9 +52,11 @@ void enable_mfgpt0_counter(void)
 }
 EXPORT_SYMBOL(enable_mfgpt0_counter);
 
-static void init_mfgpt_timer(enum clock_event_mode mode,
+static int init_mfgpt_timer(enum clock_event_mode mode,
 			     struct clock_event_device *evt)
 {
+	int ret = 0;
+
 	spin_lock(&mfgpt_lock);
 
 	switch (mode) {
@@ -78,14 +80,17 @@ static void init_mfgpt_timer(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		/* Nothing to do here */
 		break;
+	default:
+		ret = -ENOSYS;
 	}
 	spin_unlock(&mfgpt_lock);
+	return ret;
 }
 
 static struct clock_event_device mfgpt_clockevent = {
 	.name = "mfgpt",
 	.features = CLOCK_EVT_FEAT_PERIODIC,
-	.set_mode = init_mfgpt_timer,
+	.set_dev_mode = init_mfgpt_timer,
 	.irq = CS5536_MFGPT_INTR,
 };
 
