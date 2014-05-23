@@ -107,8 +107,27 @@ void clockevents_set_mode(struct clock_event_device *dev,
 	if (dev->mode != mode) {
 		int ret = dev->set_dev_mode(mode, dev);
 
-		/* Currently available modes shouldn't fail */
-		WARN_ONCE(ret, "Requested mode: %d, error: %d\n", mode, ret);
+		if (unlikely(ret)) {
+			/*
+			 * Must *not* fail while switching mode.
+			 *
+			 * Only ONESTOP_STOPPED is optional and drivers should
+			 * return -ENOSYS if they don't implement it.
+			 */
+			if (mode == CLOCK_EVT_MODE_ONESHOT_STOPPED &&
+			    ret == -ENOSYS) {
+				/*
+				 * Driver may have disabled clockevent device,
+				 * reconfigure it to last mode, i.e. ONESHOT.
+				 */
+				WARN_ON_ONCE(dev->set_dev_mode(CLOCK_EVT_MODE_ONESHOT,
+							       dev));
+				return;
+			} else {
+				WARN_ONCE(1, "Requested mode: %d, error: %d\n",
+					  mode, ret);
+			}
+		}
 
 		dev->mode = mode;
 
