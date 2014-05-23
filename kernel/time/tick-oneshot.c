@@ -22,6 +22,22 @@
 #include "tick-internal.h"
 
 /**
+ * tick_stop_event
+ */
+void tick_stop_event(void)
+{
+	struct clock_event_device *dev = __this_cpu_read(tick_cpu_device.evtdev);
+
+	/* Must be in ONESHOT or ONESHOT_STOPPED mode earlier */
+	WARN_ONCE(dev->mode != CLOCK_EVT_MODE_ONESHOT &&
+		  dev->mode != CLOCK_EVT_MODE_ONESHOT_STOPPED,
+		  "Current mode: %d\n", dev->mode);
+
+	/* stop clock event device */
+	clockevents_set_mode(dev, CLOCK_EVT_MODE_ONESHOT_STOPPED);
+}
+
+/**
  * tick_restart_event
  */
 void tick_restart_event(void)
