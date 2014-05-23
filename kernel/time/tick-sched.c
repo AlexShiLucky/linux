@@ -661,8 +661,15 @@ static ktime_t tick_nohz_stop_sched_tick(struct tick_sched *ts,
 			/* Check, if the timer was already in the past */
 			if (hrtimer_active(&ts->sched_timer))
 				goto out;
-		} else if (!tick_program_event(expires, 0))
+		} else {
+			/*
+			 * clockevent device might be in ONESHOT_STOPPED mode,
+			 * switchback to ONESHOT.
+			 */
+			tick_restart_event();
+			if (!tick_program_event(expires, 0))
 				goto out;
+		}
 		/*
 		 * We are past the event already. So we crossed a
 		 * jiffie boundary. Update jiffies and raise the
@@ -855,6 +862,11 @@ static void tick_nohz_restart(struct tick_sched *ts, ktime_t now)
 			if (hrtimer_active(&ts->sched_timer))
 				break;
 		} else {
+			/*
+			 * clockevent device might be in ONESHOT_STOPPED mode,
+			 * switchback to ONESHOT.
+			 */
+			tick_restart_event();
 			if (!tick_program_event(
 				hrtimer_get_expires(&ts->sched_timer), 0))
 				break;
@@ -955,6 +967,13 @@ static void tick_nohz_handler(struct clock_event_device *dev)
 
 	tick_sched_do_timer(now);
 	tick_sched_handle(ts, regs);
+
+	/*
+	 * Driver may not have stopped events completely, but delayed them for
+	 * long time. We need to put device in right mode again in that case.
+	 */
+	if (unlikely(dev->mode == CLOCK_EVT_MODE_ONESHOT_STOPPED))
+		tick_restart_event();
 
 	while (tick_nohz_reprogram(ts, now)) {
 		now = ktime_get();
@@ -1071,6 +1090,7 @@ static enum hrtimer_restart tick_sched_timer(struct hrtimer *timer)
 {
 	struct tick_sched *ts =
 		container_of(timer, struct tick_sched, sched_timer);
+	struct clock_event_device *dev = __this_cpu_read(tick_cpu_device.evtdev);
 	struct pt_regs *regs = get_irq_regs();
 	ktime_t now = ktime_get();
 
@@ -1084,6 +1104,13 @@ static enum hrtimer_restart tick_sched_timer(struct hrtimer *timer)
 		tick_sched_handle(ts, regs);
 
 	hrtimer_forward(timer, now, tick_period);
+
+	/*
+	 * Driver may not have stopped events completely, but delayed them for
+	 * long time. We need to put device in right mode again in that case.
+	 */
+	if (unlikely(dev->mode == CLOCK_EVT_MODE_ONESHOT_STOPPED))
+		tick_restart_event();
 
 	return HRTIMER_RESTART;
 }

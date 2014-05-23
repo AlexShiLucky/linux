@@ -81,6 +81,7 @@ extern struct tick_device *tick_get_device(int cpu);
 # ifdef CONFIG_HIGH_RES_TIMERS
 extern int tick_init_highres(void);
 extern int tick_program_event(ktime_t expires, int force);
+extern void tick_restart_event(void);
 extern void tick_setup_sched_timer(void);
 # endif
 

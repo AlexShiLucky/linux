@@ -644,6 +644,12 @@ static int hrtimer_reprogram(struct hrtimer *timer,
 		return 0;
 
 	/*
+	 * clockevent device might be in ONESHOT_STOPPED mode, switchback to
+	 * ONESHOT.
+	 */
+	tick_restart_event();
+
+	/*
 	 * Clockevents returns -ETIME, when the event was in the past.
 	 */
 	res = tick_program_event(expires, 0);
