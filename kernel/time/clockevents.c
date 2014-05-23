@@ -278,6 +278,10 @@ int clockevents_program_event(struct clock_event_device *dev, ktime_t expires,
 	if (dev->mode == CLOCK_EVT_MODE_SHUTDOWN)
 		return 0;
 
+	/* Must switch to ONESHOT mode before programming next event */
+	WARN_ONCE(dev->mode != CLOCK_EVT_MODE_ONESHOT, "Current mode: %d\n",
+		  dev->mode);
+
 	/* Shortcut for clockevent devices that can deal with ktime. */
 	if (dev->features & CLOCK_EVT_FEAT_KTIME)
 		return dev->set_next_ktime(expires, dev);

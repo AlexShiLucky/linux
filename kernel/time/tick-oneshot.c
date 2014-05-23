@@ -22,6 +22,15 @@
 #include "tick-internal.h"
 
 /**
+ * tick_restart_event
+ */
+void tick_restart_event(void)
+{
+	struct clock_event_device *dev = __this_cpu_read(tick_cpu_device.evtdev);
+	clockevents_set_mode(dev, CLOCK_EVT_MODE_ONESHOT);
+}
+
+/**
  * tick_program_event
  */
 int tick_program_event(ktime_t expires, int force)
