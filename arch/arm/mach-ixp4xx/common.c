@@ -517,7 +517,6 @@ static int ixp4xx_set_mode(enum clock_event_mode mode,
 {
 	unsigned long opts = *IXP4XX_OSRT1 & IXP4XX_OST_RELOAD_MASK;
 	unsigned long osrt = *IXP4XX_OSRT1 & ~IXP4XX_OST_RELOAD_MASK;
-	int ret = 0;
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
@@ -536,15 +535,15 @@ static int ixp4xx_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		opts |= IXP4XX_OST_ENABLE;
 		break;
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 		osrt = opts = 0;
 		break;
+	default:
+		return -ENOSYS;
 	}
 
 	*IXP4XX_OSRT1 = osrt | opts;
-	return ret;
+	return 0;
 }
 
 static struct clock_event_device clockevent_ixp4xx = {

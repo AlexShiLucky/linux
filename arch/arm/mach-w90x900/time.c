@@ -52,7 +52,6 @@ static int nuc900_clockevent_setmode(enum clock_event_mode mode,
 		struct clock_event_device *clk)
 {
 	unsigned int val;
-	int ret = 0;
 
 	val = __raw_readl(REG_TCSR0);
 	val &= ~(0x03 << 27);
@@ -76,11 +75,11 @@ static int nuc900_clockevent_setmode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		break;
 	default:
-		ret = -ENOSYS;
+		return -ENOSYS;
 	}
 
 	__raw_writel(val, REG_TCSR0);
-	return ret;
+	return 0;
 }
 
 static int nuc900_clockevent_setnextevent(unsigned long evt,

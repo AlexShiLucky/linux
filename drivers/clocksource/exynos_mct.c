@@ -248,10 +248,10 @@ static int exynos4_comp_set_mode(enum clock_event_mode mode,
 				  struct clock_event_device *evt)
 {
 	unsigned long cycles_per_jiffy;
-	exynos4_mct_comp0_stop();
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		exynos4_mct_comp0_stop();
 		cycles_per_jiffy =
 			(((unsigned long long) NSEC_PER_SEC / HZ * evt->mult) >> evt->shift);
 		exynos4_mct_comp0_start(mode, cycles_per_jiffy);
@@ -262,6 +262,7 @@ static int exynos4_comp_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
+		exynos4_mct_comp0_stop();
 		break;
 	default:
 		return -ENOSYS;
@@ -356,10 +357,9 @@ static inline int exynos4_tick_set_mode(enum clock_event_mode mode,
 	struct mct_clock_event_device *mevt = this_cpu_ptr(&percpu_mct_tick);
 	unsigned long cycles_per_jiffy;
 
-	exynos4_mct_tick_stop(mevt);
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		exynos4_mct_tick_stop(mevt);
 		cycles_per_jiffy =
 			(((unsigned long long) NSEC_PER_SEC / HZ * evt->mult) >> evt->shift);
 		exynos4_mct_tick_start(cycles_per_jiffy, mevt);
@@ -370,6 +370,7 @@ static inline int exynos4_tick_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
+		exynos4_mct_tick_stop(mevt);
 		break;
 	default:
 		return -ENOSYS;

@@ -61,8 +61,6 @@ static unsigned int clock_count_per_tick;
 static int moxart_clkevt_mode(enum clock_event_mode mode,
 			       struct clock_event_device *clk)
 {
-	int ret = 0;
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_RESUME:
 	case CLOCK_EVT_MODE_ONESHOT:
@@ -73,15 +71,15 @@ static int moxart_clkevt_mode(enum clock_event_mode mode,
 		writel(clock_count_per_tick, base + TIMER1_BASE + REG_LOAD);
 		writel(TIMER1_ENABLE, base + TIMER_CR);
 		break;
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		writel(TIMER1_DISABLE, base + TIMER_CR);
 		break;
+	default:
+		return -ENOSYS;
 	}
-	return ret;
+	return 0;
 }
 
 static int moxart_clkevt_next_event(unsigned long cycles,

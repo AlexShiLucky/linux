@@ -81,7 +81,6 @@ static int iop_set_mode(enum clock_event_mode mode,
 			 struct clock_event_device *unused)
 {
 	u32 tmr = read_tmr0();
-	int ret = 0;
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
@@ -97,17 +96,17 @@ static int iop_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		tmr |= IOP_TMR_EN;
 		break;
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		tmr &= ~IOP_TMR_EN;
 		break;
+	default:
+		return -ENOSYS;
 	}
 
 	write_tmr0(tmr);
-	return ret;
+	return 0;
 }
 
 static struct clock_event_device iop_clockevent = {

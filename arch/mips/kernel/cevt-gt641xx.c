@@ -68,7 +68,6 @@ static int gt641xx_timer0_set_mode(enum clock_event_mode mode,
 				    struct clock_event_device *evt)
 {
 	u32 ctrl;
-	int ret = 0;
 
 	raw_spin_lock(&gt641xx_timer_lock);
 
@@ -88,13 +87,14 @@ static int gt641xx_timer0_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		break;
 	default:
-		ret = -ENOSYS;
+		raw_spin_unlock(&gt641xx_timer_lock);
+		return -ENOSYS;
 	}
 
 	GT_WRITE(GT_TC_CONTROL_OFS, ctrl);
 
 	raw_spin_unlock(&gt641xx_timer_lock);
-	return ret;
+	return 0;
 }
 
 static void gt641xx_timer0_event_handler(struct clock_event_device *dev)

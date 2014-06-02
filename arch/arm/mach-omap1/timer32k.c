@@ -122,18 +122,17 @@ static int omap_32k_timer_set_next_event(unsigned long delta,
 static int omap_32k_timer_set_mode(enum clock_event_mode mode,
 				    struct clock_event_device *evt)
 {
-	omap_32k_timer_stop();
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		omap_32k_timer_stop();
 		omap_32k_timer_start(OMAP_32K_TIMER_TICK_PERIOD);
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
-		break;
 	case CLOCK_EVT_MODE_RESUME:
+		omap_32k_timer_stop();
 		break;
 	default:
 		return -ENOSYS;

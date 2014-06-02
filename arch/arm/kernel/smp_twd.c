@@ -40,7 +40,6 @@ static int twd_set_mode(enum clock_event_mode mode,
 			struct clock_event_device *clk)
 {
 	unsigned long ctrl;
-	int ret = 0;
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
@@ -53,18 +52,18 @@ static int twd_set_mode(enum clock_event_mode mode,
 		/* period set, and timer enabled in 'next_event' hook */
 		ctrl = TWD_TIMER_CONTROL_IT_ENABLE | TWD_TIMER_CONTROL_ONESHOT;
 		break;
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		ctrl = 0;
 		break;
+	default:
+		return -ENOSYS;
 	}
 
 	writel_relaxed(ctrl, twd_base + TWD_TIMER_CONTROL);
-	return ret;
+	return 0;
 }
 
 static int twd_set_next_event(unsigned long evt,

@@ -130,8 +130,6 @@ static int
 armada_370_xp_clkevt_mode(enum clock_event_mode mode,
 			  struct clock_event_device *dev)
 {
-	int ret = 0;
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
 		/*
@@ -145,8 +143,6 @@ armada_370_xp_clkevt_mode(enum clock_event_mode mode,
 		 */
 		local_timer_ctrl_clrset(0, TIMER0_RELOAD_EN | enable_mask);
 		break;
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
@@ -162,8 +158,10 @@ armada_370_xp_clkevt_mode(enum clock_event_mode mode,
 		 */
 		writel(TIMER0_CLR_MASK, local_base + LCL_TIMER_EVENTS_STATUS);
 		break;
+	default:
+		return -ENOSYS;
 	}
-	return ret;
+	return 0;
 }
 
 static int armada_370_xp_clkevt_irq;

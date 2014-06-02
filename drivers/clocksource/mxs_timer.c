@@ -175,9 +175,6 @@ static int mxs_set_mode(enum clock_event_mode mode,
 		clock_event_mode_label[mode]);
 #endif /* DEBUG */
 
-	/* Remember timer mode */
-	mxs_clockevent_mode = mode;
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_ONESHOT:
 		timrot_irq_enable();
@@ -189,8 +186,12 @@ static int mxs_set_mode(enum clock_event_mode mode,
 		/* Left event sources disabled, no more interrupts appear */
 		break;
 	default:
+		timrot_irq_enable();
 		return -ENOSYS;
 	}
+
+	/* Remember timer mode */
+	mxs_clockevent_mode = mode;
 	return 0;
 }
 

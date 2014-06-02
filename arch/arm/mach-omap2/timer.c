@@ -106,10 +106,9 @@ static int omap2_gp_timer_set_mode(enum clock_event_mode mode,
 {
 	u32 period;
 
-	__omap_dm_timer_stop(&clkev, OMAP_TIMER_POSTED, clkev.rate);
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		__omap_dm_timer_stop(&clkev, OMAP_TIMER_POSTED, clkev.rate);
 		period = clkev.rate / HZ;
 		period -= 1;
 		/* Looks like we need to first set the load value separately */
@@ -120,11 +119,11 @@ static int omap2_gp_timer_set_mode(enum clock_event_mode mode,
 					0xffffffff - period, OMAP_TIMER_POSTED);
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
-		break;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
+		__omap_dm_timer_stop(&clkev, OMAP_TIMER_POSTED, clkev.rate);
 		break;
 	default:
 		return -ENOSYS;

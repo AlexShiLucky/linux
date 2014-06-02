@@ -110,8 +110,6 @@ irqreturn_t notrace timer_interrupt(int dummy, void *dev_id)
 static int timer_ce_set_mode(enum clock_event_mode mode,
 			      struct clock_event_device *evt)
 {
-	int ret = 0;
-
 	switch (mode) {
 		case CLOCK_EVT_MODE_PERIODIC:
 		case CLOCK_EVT_MODE_RESUME:
@@ -123,10 +121,10 @@ static int timer_ce_set_mode(enum clock_event_mode mode,
 		case CLOCK_EVT_MODE_UNUSED:
 			break;
 		default:
-			ret = -ENOSYS;
+			return -ENOSYS;
 	}
 	smp_mb();
-	return ret;
+	return 0;
 }
 
 static __init void setup_timer_ce(void)

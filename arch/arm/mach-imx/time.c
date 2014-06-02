@@ -200,8 +200,6 @@ static int mxc_set_mode(enum clock_event_mode mode,
 		clock_event_mode_label[mode]);
 #endif /* DEBUG */
 
-	/* Remember timer mode */
-	clockevent_mode = mode;
 	local_irq_restore(flags);
 
 	switch (mode) {
@@ -223,8 +221,15 @@ static int mxc_set_mode(enum clock_event_mode mode,
 		/* Left event sources disabled, no more interrupts appear */
 		break;
 	default:
+		/* Enable interrupts again */
+		local_irq_save(flags);
+		gpt_irq_enable();
+		local_irq_restore(flags);
 		return -ENOSYS;
 	}
+
+	/* Remember timer mode */
+	clockevent_mode = mode;
 	return 0;
 }
 
