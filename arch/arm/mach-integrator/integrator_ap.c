@@ -312,20 +312,17 @@ static int clkevt_set_mode(enum clock_event_mode mode, struct clock_event_device
 {
 	u32 ctrl = readl(clkevt_base + TIMER_CTRL) & ~TIMER_CTRL_ENABLE;
 
-	/* Disable timer */
-	writel(ctrl, clkevt_base + TIMER_CTRL);
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		writel(ctrl, clkevt_base + TIMER_CTRL);
 		/* Enable the timer and start the periodic tick */
 		writel(timer_reload, clkevt_base + TIMER_LOAD);
 		ctrl |= TIMER_CTRL_PERIODIC | TIMER_CTRL_ENABLE;
-		writel(ctrl, clkevt_base + TIMER_CTRL);
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
+		writel(ctrl, clkevt_base + TIMER_CTRL);
 		/* Leave the timer disabled, .set_next_event will enable it */
 		ctrl &= ~TIMER_CTRL_PERIODIC;
-		writel(ctrl, clkevt_base + TIMER_CTRL);
 		break;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
@@ -336,6 +333,8 @@ static int clkevt_set_mode(enum clock_event_mode mode, struct clock_event_device
 	default:
 		return -ENOSYS;
 	}
+
+	writel(ctrl, clkevt_base + TIMER_CTRL);
 	return 0;
 }
 

@@ -35,13 +35,10 @@ static int netx_set_mode(enum clock_event_mode mode,
 		struct clock_event_device *clk)
 {
 	u32 tmode;
-	int ret = 0;
-
-	/* disable timer */
-	writel(0, NETX_GPIO_COUNTER_CTRL(TIMER_CLOCKEVENT));
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		writel(0, NETX_GPIO_COUNTER_CTRL(TIMER_CLOCKEVENT));
 		writel(LATCH, NETX_GPIO_COUNTER_MAX(TIMER_CLOCKEVENT));
 		tmode = NETX_GPIO_COUNTER_CTRL_RST_EN |
 			NETX_GPIO_COUNTER_CTRL_IRQ_EN |
@@ -49,24 +46,24 @@ static int netx_set_mode(enum clock_event_mode mode,
 		break;
 
 	case CLOCK_EVT_MODE_ONESHOT:
+		writel(0, NETX_GPIO_COUNTER_CTRL(TIMER_CLOCKEVENT));
 		writel(0, NETX_GPIO_COUNTER_MAX(TIMER_CLOCKEVENT));
 		tmode = NETX_GPIO_COUNTER_CTRL_IRQ_EN |
 			NETX_GPIO_COUNTER_CTRL_RUN;
 		break;
 
-	default:
-		ret = -ENOSYS;
-		/* fall through */
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_RESUME:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		tmode = 0;
 		break;
+	default:
+		return -ENOSYS;
 	}
 
 	writel(tmode, NETX_GPIO_COUNTER_CTRL(TIMER_CLOCKEVENT));
-	return ret;
+	return 0;
 }
 
 static int netx_set_next_event(unsigned long evt,

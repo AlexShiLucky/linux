@@ -112,10 +112,11 @@ static int clockevent_set_mode(enum clock_event_mode mode,
 	/* stop the timer */
 	val = readw(gpt_base + CR(CLKEVT));
 	val &= ~CTRL_ENABLE;
-	writew(val, gpt_base + CR(CLKEVT));
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		writew(val, gpt_base + CR(CLKEVT));
+
 		period = clk_get_rate(gpt_clk) / HZ;
 		period >>= CTRL_PRESCALER16;
 		writew(period, gpt_base + LOAD(CLKEVT));
@@ -123,24 +124,25 @@ static int clockevent_set_mode(enum clock_event_mode mode,
 		val = readw(gpt_base + CR(CLKEVT));
 		val &= ~CTRL_ONE_SHOT;
 		val |= CTRL_ENABLE | CTRL_INT_ENABLE;
-		writew(val, gpt_base + CR(CLKEVT));
 
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
+		writew(val, gpt_base + CR(CLKEVT));
+
 		val = readw(gpt_base + CR(CLKEVT));
 		val |= CTRL_ONE_SHOT;
-		writew(val, gpt_base + CR(CLKEVT));
 
 		break;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
-
 		break;
 	default:
 		return -ENOSYS;
 	}
+
+	writew(val, gpt_base + CR(CLKEVT));
 	return 0;
 }
 

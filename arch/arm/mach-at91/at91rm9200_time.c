@@ -141,6 +141,7 @@ clkevt32k_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 		irqmask = 0;
 		break;
 	default:
+		/* irqmask retains value from last call */
 		ret = -ENOSYS;
 	}
 	at91_st_write(AT91_ST_IER, irqmask);

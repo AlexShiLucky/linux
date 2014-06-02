@@ -86,7 +86,7 @@ static int cns3xxx_timer_set_mode(enum clock_event_mode mode,
 {
 	unsigned long ctrl = readl(cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
 	int pclk = cns3xxx_cpu_clock() / 8;
-	int reload, ret = 0;
+	int reload;
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
@@ -98,18 +98,18 @@ static int cns3xxx_timer_set_mode(enum clock_event_mode mode,
 		/* period set, and timer enabled in 'next_event' hook */
 		ctrl |= (1 << 2) | (1 << 9);
 		break;
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		ctrl = 0;
 		break;
+	default:
+		return -ENOSYS;
 	}
 
 	writel(ctrl, cns3xxx_tmr1 + TIMER1_2_CONTROL_OFFSET);
-	return ret;
+	return 0;
 }
 
 static int cns3xxx_timer_set_next_event(unsigned long evt,

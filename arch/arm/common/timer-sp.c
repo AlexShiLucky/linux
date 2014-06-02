@@ -131,12 +131,10 @@ static int sp804_set_mode(enum clock_event_mode mode,
 	struct clock_event_device *evt)
 {
 	unsigned long ctrl = TIMER_CTRL_32BIT | TIMER_CTRL_IE;
-	int ret = 0;
-
-	writel(ctrl, clkevt_base + TIMER_CTRL);
 
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		writel(ctrl, clkevt_base + TIMER_CTRL);
 		writel(clkevt_reload, clkevt_base + TIMER_LOAD);
 		ctrl |= TIMER_CTRL_PERIODIC | TIMER_CTRL_ENABLE;
 		break;
@@ -155,11 +153,11 @@ static int sp804_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_RESUME:
 		break;
 	default:
-		ret = -ENOSYS;
+		return -ENOSYS;
 	}
 
 	writel(ctrl, clkevt_base + TIMER_CTRL);
-	return ret;
+	return 0;
 }
 
 static int sp804_set_next_event(unsigned long next,

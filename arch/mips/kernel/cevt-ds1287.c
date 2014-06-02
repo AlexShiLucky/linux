@@ -63,7 +63,6 @@ static int ds1287_set_mode(enum clock_event_mode mode,
 			    struct clock_event_device *evt)
 {
 	u8 val;
-	int ret = 0;
 
 	spin_lock(&rtc_lock);
 
@@ -73,19 +72,20 @@ static int ds1287_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_PERIODIC:
 		val |= RTC_PIE;
 		break;
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 		val &= ~RTC_PIE;
 		break;
+	default:
+		spin_unlock(&rtc_lock);
+		return -ENOSYS;
 	}
 
 	CMOS_WRITE(val, RTC_REG_B);
 
 	spin_unlock(&rtc_lock);
-	return ret;
+	return 0;
 }
 
 static void ds1287_event_handler(struct clock_event_device *dev)

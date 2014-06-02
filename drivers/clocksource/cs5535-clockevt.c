@@ -80,10 +80,9 @@ static void start_timer(struct cs5535_mfgpt_timer *timer, uint16_t delta)
 static int mfgpt_set_mode(enum clock_event_mode mode,
 		struct clock_event_device *evt)
 {
-	disable_timer(cs5535_event_clock);
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		disable_timer(cs5535_event_clock);
 		start_timer(cs5535_event_clock, MFGPT_PERIODIC);
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
@@ -91,6 +90,7 @@ static int mfgpt_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
+		disable_timer(cs5535_event_clock);
 		break;
 	default:
 		return -ENOSYS;

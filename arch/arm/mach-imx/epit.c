@@ -127,8 +127,6 @@ static int epit_set_mode(enum clock_event_mode mode,
 		epit_irq_acknowledge();
 	}
 
-	/* Remember timer mode */
-	clockevent_mode = mode;
 	local_irq_restore(flags);
 
 	switch (mode) {
@@ -150,8 +148,15 @@ static int epit_set_mode(enum clock_event_mode mode,
 		/* Left event sources disabled, no more interrupts appear */
 		break;
 	default:
+		/* Enable interrupts again */
+		local_irq_save(flags);
+		epit_irq_enable();
+		local_irq_restore(flags);
 		return -ENOSYS;
 	}
+
+	/* Remember timer mode */
+	clockevent_mode = mode;
 	return 0;
 }
 

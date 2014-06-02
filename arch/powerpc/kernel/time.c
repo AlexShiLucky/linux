@@ -818,11 +818,7 @@ static int decrementer_set_next_event(unsigned long evt,
 static void decrementer_set_mode(enum clock_event_mode mode,
 				 struct clock_event_device *dev)
 {
-	int ret = 0;
-
 	switch (mode) {
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
@@ -831,8 +827,10 @@ static void decrementer_set_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
 		break;
+	default:
+		return -ENOSYS;
 	}
-	return ret;
+	return 0;
 }
 
 static void register_decrementer_clockevent(int cpu)

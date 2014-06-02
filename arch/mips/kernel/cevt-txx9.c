@@ -83,9 +83,9 @@ static int txx9tmr_set_mode(enum clock_event_mode mode,
 		container_of(evt, struct txx9_clock_event_device, cd);
 	struct txx9_tmr_reg __iomem *tmrptr = txx9_cd->tmrptr;
 
-	txx9tmr_stop_and_clear(tmrptr);
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		txx9tmr_stop_and_clear(tmrptr);
 		__raw_writel(TXx9_TMITMR_TIIE | TXx9_TMITMR_TZCE,
 			     &tmrptr->itmr);
 		/* start timer */
@@ -97,12 +97,15 @@ static int txx9tmr_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_UNUSED:
+		txx9tmr_stop_and_clear(tmrptr);
 		__raw_writel(0, &tmrptr->itmr);
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
+		txx9tmr_stop_and_clear(tmrptr);
 		__raw_writel(TXx9_TMITMR_TIIE, &tmrptr->itmr);
 		break;
 	case CLOCK_EVT_MODE_RESUME:
+		txx9tmr_stop_and_clear(tmrptr);
 		__raw_writel(TIMER_CCD, &tmrptr->ccdr);
 		__raw_writel(0, &tmrptr->itmr);
 		break;

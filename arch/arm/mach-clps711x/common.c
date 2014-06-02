@@ -267,8 +267,6 @@ static u64 notrace clps711x_sched_clock_read(void)
 static int clps711x_clockevent_set_mode(enum clock_event_mode mode,
 					 struct clock_event_device *evt)
 {
-	disable_irq(IRQ_TC2OI);
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
 		enable_irq(IRQ_TC2OI);
@@ -276,6 +274,7 @@ static int clps711x_clockevent_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_RESUME:
+		disable_irq(IRQ_TC2OI);
 		/* Left event sources disabled, no more interrupts appear */
 		break;
 	default:

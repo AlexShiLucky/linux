@@ -116,8 +116,6 @@ static int sirfsoc_timer_set_next_event(unsigned long delta,
 static int sirfsoc_timer_set_mode(enum clock_event_mode mode,
 	struct clock_event_device *ce)
 {
-	int ret = 0;
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_ONESHOT:
 		/* enable in set_next_event */
@@ -125,13 +123,13 @@ static int sirfsoc_timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
+		sirfsoc_timer_count_disable(smp_processor_id());
 		break;
 	default:
-		ret = -ENOSYS;
+		return -ENOSYS;
 	}
 
-	sirfsoc_timer_count_disable(smp_processor_id());
-	return ret;
+	return 0;
 }
 
 static void sirfsoc_clocksource_suspend(struct clocksource *cs)

@@ -210,21 +210,19 @@ static int samsung_set_next_event(unsigned long cycles,
 static int samsung_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
-	samsung_time_stop(pwm.event_id);
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		samsung_time_stop(pwm.event_id);
 		samsung_time_setup(pwm.event_id, pwm.clock_count_per_tick - 1);
 		samsung_time_start(pwm.event_id, true);
 		break;
 
 	case CLOCK_EVT_MODE_ONESHOT:
-		break;
-
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
+		samsung_time_stop(pwm.event_id);
 		break;
 	default:
 		return -ENOSYS;

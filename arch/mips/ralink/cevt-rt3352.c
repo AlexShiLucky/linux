@@ -113,7 +113,6 @@ static int systick_set_clock_mode(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_RESUME:
-		pr_err("%s: Unhandeled mips clock_mode\n", systick.dev.name);
 		break;
 	default:
 		return -ENOSYS;

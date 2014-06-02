@@ -55,8 +55,6 @@ EXPORT_SYMBOL(enable_mfgpt0_counter);
 static int init_mfgpt_timer(enum clock_event_mode mode,
 			     struct clock_event_device *evt)
 {
-	int ret = 0;
-
 	spin_lock(&mfgpt_lock);
 
 	switch (mode) {
@@ -77,10 +75,11 @@ static int init_mfgpt_timer(enum clock_event_mode mode,
 		/* Nothing to do here */
 		break;
 	default:
-		ret = -ENOSYS;
+		spin_unlock(&mfgpt_lock);
+		return -ENOSYS;
 	}
 	spin_unlock(&mfgpt_lock);
-	return ret;
+	return 0;
 }
 
 static struct clock_event_device mfgpt_clockevent = {

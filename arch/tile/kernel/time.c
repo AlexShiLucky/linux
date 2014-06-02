@@ -143,14 +143,13 @@ static int tile_timer_set_next_event(unsigned long ticks,
 static int tile_timer_set_mode(enum clock_event_mode mode,
 				struct clock_event_device *evt)
 {
-	arch_local_irq_mask_now(INT_TILE_TIMER);
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
+		arch_local_irq_mask_now(INT_TILE_TIMER);
 		break;
 	default:
 		return -ENOSYS;

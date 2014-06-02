@@ -177,13 +177,12 @@ qemu_ce_set_mode(enum clock_event_mode mode, struct clock_event_device *ce)
 {
 	/* The mode member of CE is updated for us in generic code.
 	   Just make sure that the event is disabled.  */
-	qemu_set_alarm_abs(0);
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
+		qemu_set_alarm_abs(0);
 		break;
 
 	default:

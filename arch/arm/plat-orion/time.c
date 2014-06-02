@@ -110,7 +110,6 @@ static int
 orion_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 {
 	unsigned long flags;
-	int ret = 0;
 	u32 u;
 
 	local_irq_save(flags);
@@ -136,8 +135,6 @@ orion_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 		       timer_base + TIMER_CTRL_OFF);
 		break;
 
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
@@ -160,9 +157,12 @@ orion_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 		 */
 		writel(bridge_timer1_clr_mask, bridge_base + BRIDGE_CAUSE_OFF);
 		break;
+	default:
+		local_irq_restore(flags);
+		return -ENOSYS;
 	}
 	local_irq_restore(flags);
-	return ret;
+	return 0;
 }
 
 static struct clock_event_device orion_clkevt = {

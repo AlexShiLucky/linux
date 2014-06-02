@@ -74,19 +74,18 @@ static int tegra_timer_set_mode(enum clock_event_mode mode,
 {
 	u32 reg;
 
-	timer_writel(0, TIMER3_BASE + TIMER_PTV);
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
+		timer_writel(0, TIMER3_BASE + TIMER_PTV);
 		reg = 0xC0000000 | ((1000000/HZ)-1);
 		timer_writel(reg, TIMER3_BASE + TIMER_PTV);
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
-		break;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
+		timer_writel(0, TIMER3_BASE + TIMER_PTV);
 		break;
 	default:
 		return -ENOSYS;

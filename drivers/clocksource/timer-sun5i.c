@@ -82,8 +82,6 @@ static void sun5i_clkevt_time_start(u8 timer, bool periodic)
 static int sun5i_clkevt_mode(enum clock_event_mode mode,
 			      struct clock_event_device *clk)
 {
-	int ret = 0;
-
 	switch (mode) {
 	case CLOCK_EVT_MODE_PERIODIC:
 		sun5i_clkevt_time_stop(0);
@@ -94,16 +92,16 @@ static int sun5i_clkevt_mode(enum clock_event_mode mode,
 		sun5i_clkevt_time_stop(0);
 		sun5i_clkevt_time_start(0, false);
 		break;
-	default:
-		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		sun5i_clkevt_time_stop(0);
 		break;
+	default:
+		return -ENOSYS;
 	}
-	return ret;
+	return 0;
 }
 
 static int sun5i_clkevt_next_event(unsigned long evt,
