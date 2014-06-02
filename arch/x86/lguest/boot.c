@@ -975,8 +975,6 @@ static int lguest_clockevent_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_ONESHOT:
 		/* This is what we expect. */
 		break;
-	case CLOCK_EVT_MODE_PERIODIC:
-		BUG();
 	case CLOCK_EVT_MODE_RESUME:
 		break;
 	default:

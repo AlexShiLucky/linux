@@ -98,9 +98,6 @@ static int zevio_timer_set_mode(enum clock_event_mode mode,
 		/* Stop timer */
 		writel(CNTL_STOP_TIMER, timer->timer1 + IO_CONTROL);
 		break;
-	case CLOCK_EVT_MODE_PERIODIC:
-		/* Unsupported */
-		break;
 	default:
 		return -ENOSYS;
 	}

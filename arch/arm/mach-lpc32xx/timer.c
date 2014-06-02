@@ -47,10 +47,6 @@ static int lpc32xx_clkevt_mode(enum clock_event_mode mode,
     struct clock_event_device *dev)
 {
 	switch (mode) {
-	case CLOCK_EVT_MODE_PERIODIC:
-		WARN_ON(1);
-		break;
-
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_ONESHOT_STOPPED:

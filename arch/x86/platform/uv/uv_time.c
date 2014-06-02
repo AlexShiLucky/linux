@@ -329,7 +329,6 @@ static int uv_rtc_timer_setup(enum clock_event_mode mode,
 	int ced_cpu = cpumask_first(evt->cpumask);
 
 	switch (mode) {
-	case CLOCK_EVT_MODE_PERIODIC:
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_RESUME:
 		/* Nothing to do here yet */

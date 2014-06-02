@@ -92,9 +92,6 @@ pit_clkevt_mode(enum clock_event_mode mode, struct clock_event_device *dev)
 		pit_write(AT91_PIT_MR, (pit_cycle - 1) | AT91_PIT_PITEN
 				| AT91_PIT_PITIEN);
 		break;
-	case CLOCK_EVT_MODE_ONESHOT:
-		BUG();
-		/* FALLTHROUGH */
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
 		/* disable irq, leaving the clocksource active */

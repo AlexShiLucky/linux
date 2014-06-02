@@ -73,10 +73,6 @@ static int init_mfgpt_timer(enum clock_event_mode mode,
 			disable_mfgpt0_counter();
 		break;
 
-	case CLOCK_EVT_MODE_ONESHOT:
-		/* The oneshot mode have very high deviation, Not use it! */
-		break;
-
 	case CLOCK_EVT_MODE_RESUME:
 		/* Nothing to do here */
 		break;

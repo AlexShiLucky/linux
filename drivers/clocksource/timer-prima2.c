@@ -102,9 +102,6 @@ static int sirfsoc_timer_set_mode(enum clock_event_mode mode,
 {
 	u32 val = readl_relaxed(sirfsoc_timer_base + SIRFSOC_TIMER_INT_EN);
 	switch (mode) {
-	case CLOCK_EVT_MODE_PERIODIC:
-		WARN_ON(1);
-		break;
 	case CLOCK_EVT_MODE_ONESHOT:
 		writel_relaxed(val | BIT(0), sirfsoc_timer_base + SIRFSOC_TIMER_INT_EN);
 		break;

@@ -52,10 +52,6 @@ static int openrisc_timer_set_mode(enum clock_event_mode mode,
 				    struct clock_event_device *evt)
 {
 	switch (mode) {
-	case CLOCK_EVT_MODE_PERIODIC:
-		pr_debug(KERN_INFO "%s: periodic\n", __func__);
-		BUG();
-		break;
 	case CLOCK_EVT_MODE_ONESHOT:
 		pr_debug(KERN_INFO "%s: oneshot\n", __func__);
 		break;

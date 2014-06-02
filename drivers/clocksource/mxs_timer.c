@@ -179,9 +179,6 @@ static int mxs_set_mode(enum clock_event_mode mode,
 	mxs_clockevent_mode = mode;
 
 	switch (mode) {
-	case CLOCK_EVT_MODE_PERIODIC:
-		pr_err("%s: Periodic mode is not implemented\n", __func__);
-		break;
 	case CLOCK_EVT_MODE_ONESHOT:
 		timrot_irq_enable();
 		break;

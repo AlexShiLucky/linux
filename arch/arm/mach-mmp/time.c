@@ -134,7 +134,6 @@ static int timer_set_mode(enum clock_event_mode mode,
 		local_irq_restore(flags);
 		break;
 	case CLOCK_EVT_MODE_RESUME:
-	case CLOCK_EVT_MODE_PERIODIC:
 		break;
 	default:
 		return -ENOSYS;
