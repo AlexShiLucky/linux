@@ -278,11 +278,6 @@ static int xen_timerop_set_mode(enum clock_event_mode mode,
 				 struct clock_event_device *evt)
 {
 	switch (mode) {
-	case CLOCK_EVT_MODE_PERIODIC:
-		/* unsupported */
-		WARN_ON(1);
-		break;
-
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
@@ -336,10 +331,6 @@ static int xen_vcpuop_set_mode(enum clock_event_mode mode,
 	int cpu = smp_processor_id();
 
 	switch (mode) {
-	case CLOCK_EVT_MODE_PERIODIC:
-		WARN_ON(1);	/* unsupported */
-		break;
-
 	case CLOCK_EVT_MODE_ONESHOT:
 		if (HYPERVISOR_vcpu_op(VCPUOP_stop_periodic_timer, cpu, NULL))
 			BUG();

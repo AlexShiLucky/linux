@@ -64,7 +64,6 @@ static int score_timer_set_mode(enum clock_event_mode mode,
 		outl(SYSTEM_CLOCK/HZ, P_TIMER0_PRELOAD);
 		outl(inl(P_TIMER0_CTRL) | TMR_ENABLE, P_TIMER0_CTRL);
 		break;
-	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
 	case CLOCK_EVT_MODE_UNUSED:

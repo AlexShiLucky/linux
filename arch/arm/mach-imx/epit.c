@@ -132,10 +132,6 @@ static int epit_set_mode(enum clock_event_mode mode,
 	local_irq_restore(flags);
 
 	switch (mode) {
-	case CLOCK_EVT_MODE_PERIODIC:
-		printk(KERN_ERR "epit_set_mode: Periodic mode is not "
-				"supported for i.MX EPIT\n");
-		break;
 	case CLOCK_EVT_MODE_ONESHOT:
 	/*
 	 * Do not put overhead of interrupt enable/disable into

@@ -34,10 +34,8 @@ static int a20r_set_mode(enum clock_event_mode mode,
 		wmb();
 
 		break;
-	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
-		break;
 	case CLOCK_EVT_MODE_RESUME:
 		break;
 	default:

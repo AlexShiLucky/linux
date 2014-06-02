@@ -68,10 +68,6 @@ static int metag_timer_set_mode(enum clock_event_mode mode,
 		/* We should disable the IRQ here */
 		break;
 
-	case CLOCK_EVT_MODE_PERIODIC:
-	case CLOCK_EVT_MODE_UNUSED:
-		WARN_ON(1);
-		break;
 	default:
 		return -ENOSYS;
 	};

@@ -59,7 +59,6 @@ puv3_osmr0_set_mode(enum clock_event_mode mode, struct clock_event_device *c)
 		break;
 
 	case CLOCK_EVT_MODE_RESUME:
-	case CLOCK_EVT_MODE_PERIODIC:
 		break;
 	default:
 		return -ENOSYS;

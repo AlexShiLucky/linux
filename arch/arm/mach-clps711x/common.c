@@ -273,8 +273,6 @@ static int clps711x_clockevent_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_PERIODIC:
 		enable_irq(IRQ_TC2OI);
 		break;
-	case CLOCK_EVT_MODE_ONESHOT:
-		/* Not supported */
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_RESUME:
