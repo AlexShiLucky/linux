@@ -330,6 +330,7 @@ static int clkevt_set_mode(enum clock_event_mode mode, struct clock_event_device
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		/* Just leave in disabled state */
 		break;
 	default:

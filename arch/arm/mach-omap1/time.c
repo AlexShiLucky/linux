@@ -135,6 +135,9 @@ static int omap_mpu_set_mode(enum clock_event_mode mode,
 		omap_mpu_timer_stop(0);
 		omap_mpu_remove_autoreset(0);
 		break;
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
+		omap_mpu_timer_stop(0);
+		break;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
