@@ -120,6 +120,7 @@ static int init_pit_timer(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		if (evt->mode == CLOCK_EVT_MODE_PERIODIC ||
 		    evt->mode == CLOCK_EVT_MODE_ONESHOT) {
 			outb_p(0x30, PIT_MODE);

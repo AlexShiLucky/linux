@@ -185,6 +185,7 @@ static __always_inline int timer_set_mode(const int access, int mode,
 	switch (mode) {
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		ctrl = arch_timer_reg_read(access, ARCH_TIMER_REG_CTRL, clk);
 		ctrl &= ~ARCH_TIMER_CTRL_ENABLE;
 		arch_timer_reg_write(access, ARCH_TIMER_REG_CTRL, ctrl, clk);
