@@ -141,6 +141,10 @@ static int sp804_set_mode(enum clock_event_mode mode,
 		ctrl |= TIMER_CTRL_PERIODIC | TIMER_CTRL_ENABLE;
 		break;
 
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
+		ctrl = 0;
+		break;
+
 	case CLOCK_EVT_MODE_ONESHOT:
 		/* period set, and timer enabled in 'next_event' hook */
 		ctrl |= TIMER_CTRL_ONESHOT;

@@ -53,6 +53,7 @@ static int lpc32xx_clkevt_mode(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		/*
 		 * Disable the timer. When using oneshot, we must also
 		 * disable the timer to wait for the first call to

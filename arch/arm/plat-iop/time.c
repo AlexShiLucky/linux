@@ -101,6 +101,7 @@ static int iop_set_mode(enum clock_event_mode mode,
 		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		tmr &= ~IOP_TMR_EN;
 		break;
 	}

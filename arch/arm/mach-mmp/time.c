@@ -127,6 +127,7 @@ static int timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		/* disable the matching interrupt */
 		local_irq_save(flags);
 		__raw_writel(0x00, mmp_timer_base + TMR_IER(0));

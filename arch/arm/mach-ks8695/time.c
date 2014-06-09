@@ -77,6 +77,12 @@ static int ks8695_set_mode(enum clock_event_mode mode,
 		tmcon |= TMCON_T1EN;
 		writel_relaxed(tmcon, KS8695_TMR_VA + KS8695_TMCON);
 		break;
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
+		/* Disable timer 1 */
+		tmcon = readl_relaxed(KS8695_TMR_VA + KS8695_TMCON);
+		tmcon &= ~TMCON_T1EN;
+		writel_relaxed(tmcon, KS8695_TMR_VA + KS8695_TMCON);
+		break;
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:

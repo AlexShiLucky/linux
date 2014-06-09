@@ -59,6 +59,7 @@ sa1100_osmr0_set_mode(enum clock_event_mode mode, struct clock_event_device *c)
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		writel_relaxed(readl_relaxed(OIER) & ~OIER_E0, OIER);
 		writel_relaxed(OSSR_M0, OSSR);
 		break;

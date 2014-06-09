@@ -530,6 +530,7 @@ static int ixp4xx_set_mode(enum clock_event_mode mode,
 		opts = IXP4XX_OST_ENABLE | IXP4XX_OST_ONE_SHOT;
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		opts &= ~IXP4XX_OST_ENABLE;
 		break;
 	case CLOCK_EVT_MODE_RESUME:
