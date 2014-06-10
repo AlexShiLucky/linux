@@ -165,6 +165,7 @@ static int apbt_set_mode(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		ctrl = apbt_readl(&dw_ced->timer, APBTMR_N_CONTROL);
 		ctrl &= ~APBTMR_CONTROL_ENABLE;
 		apbt_writel(&dw_ced->timer, ctrl, APBTMR_N_CONTROL);

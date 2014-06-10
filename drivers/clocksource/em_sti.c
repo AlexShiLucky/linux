@@ -273,6 +273,7 @@ static int em_sti_clock_event_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		em_sti_stop(p, USER_CLOCKEVENT);
 		break;
 	case CLOCK_EVT_MODE_RESUME:

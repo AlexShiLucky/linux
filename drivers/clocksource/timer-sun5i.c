@@ -99,6 +99,7 @@ static int sun5i_clkevt_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		sun5i_clkevt_time_stop(0);
 		break;
 	}

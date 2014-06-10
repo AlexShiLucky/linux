@@ -109,6 +109,7 @@ static int sirfsoc_timer_set_mode(enum clock_event_mode mode,
 		writel_relaxed(val | BIT(0), sirfsoc_timer_base + SIRFSOC_TIMER_INT_EN);
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		writel_relaxed(val & ~BIT(0), sirfsoc_timer_base + SIRFSOC_TIMER_INT_EN);
 		break;
 	case CLOCK_EVT_MODE_UNUSED:

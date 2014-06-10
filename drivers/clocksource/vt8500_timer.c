@@ -98,6 +98,7 @@ static int vt8500_timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		writel(readl(regbase + TIMER_CTRL_VAL) | 1,
 			regbase + TIMER_CTRL_VAL);
 		writel(0, regbase + TIMER_IER_VAL);

@@ -123,6 +123,7 @@ static int sirfsoc_timer_set_mode(enum clock_event_mode mode,
 		/* enable in set_next_event */
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
 	default:

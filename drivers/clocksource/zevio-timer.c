@@ -91,6 +91,7 @@ static int zevio_timer_set_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		/* Disable timer interrupts */
 		writel(0, timer->interrupt_regs + IO_INTR_MSK);
 		writel(TIMER_INTR_ALL, timer->interrupt_regs + IO_INTR_ACK);
