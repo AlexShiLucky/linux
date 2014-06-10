@@ -92,6 +92,7 @@ static int ccount_timer_set_mode(enum clock_event_mode mode,
 	switch (mode) {
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		if (timer->irq_enabled) {
 			disable_irq(evt->irq);
 			timer->irq_enabled = 0;

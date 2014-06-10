@@ -109,6 +109,10 @@ static int xilinx_timer_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_ONESHOT:
 		pr_info("%s: oneshot\n", __func__);
 		break;
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
+		pr_info("%s: oneshot stopped\n", __func__);
+		xilinx_timer0_stop();
+		break;
 	case CLOCK_EVT_MODE_UNUSED:
 		pr_info("%s: unused\n", __func__);
 		break;

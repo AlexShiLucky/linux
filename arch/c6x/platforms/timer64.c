@@ -141,6 +141,7 @@ static int set_clock_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		timer64_mode = TIMER64_MODE_DISABLED;
 		timer64_disable();
 		break;
