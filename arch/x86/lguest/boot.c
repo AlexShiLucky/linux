@@ -968,6 +968,7 @@ static int lguest_clockevent_set_mode(enum clock_event_mode mode,
 	switch (mode) {
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		/* A 0 argument shuts the clock down. */
 		hcall(LHCALL_SET_CLOCKEVENT, 0, 0, 0, 0);
 		break;
