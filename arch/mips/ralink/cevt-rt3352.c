@@ -104,6 +104,7 @@ static int systick_set_clock_mode(enum clock_event_mode mode,
 		break;
 
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		if (sdev->irq_requested)
 			free_irq(systick.dev.irq, &systick_irqaction);
 		sdev->irq_requested = 0;

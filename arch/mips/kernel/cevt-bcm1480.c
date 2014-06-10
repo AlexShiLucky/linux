@@ -59,6 +59,7 @@ static int sibyte_set_mode(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_ONESHOT:
 		/* Stop the timer until we actually program a shot */
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 		__raw_writeq(0, cfg);
 		break;

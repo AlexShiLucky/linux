@@ -70,6 +70,7 @@ static int jz4740_clockevent_set_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		jz4740_timer_disable(TIMER_CLOCKEVENT);
 		break;
 	case CLOCK_EVT_MODE_UNUSED:

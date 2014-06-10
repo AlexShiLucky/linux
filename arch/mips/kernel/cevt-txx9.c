@@ -95,6 +95,7 @@ static int txx9tmr_set_mode(enum clock_event_mode mode,
 		__raw_writel(TCR_BASE | TXx9_TMTCR_TCE, &tmrptr->tcr);
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 	case CLOCK_EVT_MODE_UNUSED:
 		__raw_writel(0, &tmrptr->itmr);
 		break;
