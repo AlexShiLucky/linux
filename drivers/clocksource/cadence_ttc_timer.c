@@ -204,6 +204,7 @@ static int ttc_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		ctrl_reg = __raw_readl(timer->base_addr +
 					TTC_CNT_CNTRL_OFFSET);
 		ctrl_reg |= TTC_CNT_CNTRL_DISABLE_MASK;

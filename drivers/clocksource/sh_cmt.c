@@ -611,6 +611,7 @@ static int sh_cmt_clock_event_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		sh_cmt_stop(p, FLAG_CLOCKEVENT);
 		break;
 	case CLOCK_EVT_MODE_RESUME:

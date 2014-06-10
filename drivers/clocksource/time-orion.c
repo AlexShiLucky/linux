@@ -91,6 +91,7 @@ static int orion_clkevt_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		/* disable timer */
 		orion_timer_ctrl_clrset(TIMER1_RELOAD_EN | TIMER1_EN, 0);
 		break;

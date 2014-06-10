@@ -353,6 +353,7 @@ static int sh_tmu_clock_event_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		break;
 	default:
 		return -ENOSYS;

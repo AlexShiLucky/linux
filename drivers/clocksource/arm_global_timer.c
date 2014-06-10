@@ -119,6 +119,7 @@ static int gt_clockevent_set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		ctrl = readl(gt_base + GT_CONTROL);
 		ctrl &= ~(GT_CONTROL_COMP_ENABLE |
 				GT_CONTROL_IRQ_ENABLE | GT_CONTROL_AUTO_INC);

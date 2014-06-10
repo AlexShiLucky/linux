@@ -140,6 +140,7 @@ static int tc_mode(enum clock_event_mode m, struct clock_event_device *d)
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_RESUME:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		break;
 	default:
 		return -ENOSYS;

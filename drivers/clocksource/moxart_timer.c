@@ -77,6 +77,7 @@ static int moxart_clkevt_mode(enum clock_event_mode mode,
 		ret = -ENOSYS;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		writel(TIMER1_DISABLE, base + TIMER_CR);
 		break;
 	}

@@ -132,6 +132,7 @@ static int nmdk_clkevt_mode(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		writel(0, mtu_base + MTU_IMSC);
 		/* disable timer */
 		writel(0, mtu_base + MTU_CR(1));
