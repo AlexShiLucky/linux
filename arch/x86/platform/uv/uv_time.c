@@ -336,6 +336,7 @@ static int uv_rtc_timer_setup(enum clock_event_mode mode,
 		break;
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		uv_rtc_unset_timer(ced_cpu, 1);
 		break;
 	default:
