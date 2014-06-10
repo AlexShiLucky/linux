@@ -53,6 +53,7 @@ puv3_osmr0_set_mode(enum clock_event_mode mode, struct clock_event_device *c)
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_UNUSED:
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		writel(readl(OST_OIER) & ~OST_OIER_E0, OST_OIER);
 		writel(readl(OST_OSSR) & ~OST_OSSR_M0, OST_OSSR);
 		break;

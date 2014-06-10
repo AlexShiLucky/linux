@@ -701,6 +701,7 @@ static int sparc64_timer_setup(enum clock_event_mode mode,
 		break;
 
 	case CLOCK_EVT_MODE_SHUTDOWN:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 		tick_ops->disable_irq();
 		break;
 

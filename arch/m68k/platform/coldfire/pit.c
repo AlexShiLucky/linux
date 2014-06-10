@@ -57,6 +57,7 @@ static int init_cf_pit_timer(enum clock_event_mode mode,
 
 	case CLOCK_EVT_MODE_SHUTDOWN:
 	case CLOCK_EVT_MODE_UNUSED:
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
 
 		__raw_writew(MCFPIT_PCSR_DISABLE, TA(MCFPIT_PCSR));
 		break;

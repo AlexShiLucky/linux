@@ -110,6 +110,9 @@ static int set_mode(enum clock_event_mode mode,
 	case CLOCK_EVT_MODE_ONESHOT:
 	case CLOCK_EVT_MODE_RESUME:
 		break;
+	case CLOCK_EVT_MODE_ONESHOT_STOPPED:
+		iowrite32(0, &rtos_timer->enable);
+		break;
 	default:
 		return -ENOSYS;
 	}
