@@ -56,8 +56,3 @@ int pmd_huge(pmd_t pmd)
 {
 	return pmd_thp_or_huge(pmd);
 }
-
-int pmd_huge_support(void)
-{
-	return 1;
-}
