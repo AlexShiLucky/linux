@@ -12,6 +12,7 @@
  */
 #include <linux/linkage.h>
 #include <linux/init.h>
+#include <asm/assembler.h>
 
 /*
  * exynos4 specific entry point for secondary CPUs.  This provides
@@ -19,8 +20,13 @@
  * ready for them to initialise.
  */
 ENTRY(exynos4_secondary_startup)
+	/*
+	* ROM code operates in little endian mode, when we get control we
+	* need to switch it to big endian mode.
+	*/
+ARM_BE8(setend	be)
 	mrc	p15, 0, r0, c0, c0, 5
-	and	r0, r0, #15
+	and	r0, r0, #0xffffff
 	adr	r4, 1f
 	ldmia	r4, {r5, r6}
 	sub	r4, r4, r5
