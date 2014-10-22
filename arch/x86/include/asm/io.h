@@ -81,6 +81,10 @@ build_mmio_write(__writel, "l", unsigned int, "r", )
 #define __raw_writew __writew
 #define __raw_writel __writel
 
+#define writeb_relaxed  __writeb
+#define writew_relaxed  __writew
+#define writel_relaxed  __writel
+
 #define mmiowb() barrier()
 
 #ifdef CONFIG_X86_64
