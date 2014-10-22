@@ -1276,6 +1276,7 @@ static int update_relax_domain_level(struct cpuset *cs, s64 val)
 /**
  * quiesce_cpuset - Move unbound timers/hrtimers away from cpuset.cpus
  * @cs: cpuset to be quiesced
+ * @return: 0 on success else non-zero on failure
  *
  * For isolating a core with cpusets we require all unbound timers/hrtimers to
  * move away from isolated core. We migrate these to one of the CPUs which
@@ -1389,7 +1390,7 @@ static int update_flag(cpuset_flagbits_t bit, struct cpuset *cs,
 	if (bit == CS_QUIESCE) {
 		err = quiesce_cpuset(cs, turning_on);
 		if (err)
-			return err;
+			goto out;
 	}
 
 	err = heap_init(&heap, PAGE_SIZE, GFP_KERNEL, NULL);
