@@ -198,11 +198,17 @@ static int __init root_nfs_parse_options(char *incoming, char *exppath,
 	/*
 	 * @incoming now points to the rest of the string; if it
 	 * contains something, append it to our root options buffer
+	 * (but first make sure to delete any extraneous trailing
+	 * options passed in on the boot command line)
 	 */
-	if (incoming != NULL && *incoming != '\0')
+	if (incoming != NULL && *incoming != '\0') {
+		p = strpbrk(incoming, " ");
+		if ( p != NULL )
+			*p = '\0';
 		if (root_nfs_cat(nfs_root_options, incoming,
 						sizeof(nfs_root_options)))
 			return -1;
+	}
 	return 0;
 }
 
