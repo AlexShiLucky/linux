@@ -717,8 +717,14 @@ static ktime_t tick_nohz_stop_sched_tick(struct tick_sched *ts,
 			/* Check, if the timer was already in the past */
 			if (hrtimer_active(&ts->sched_timer))
 				goto out;
-		} else if (!tick_program_event(expires, 0))
+		} else {
+			/* Switchback to ONESHOT mode */
+			if (unlikely(dev->mode == CLOCK_EVT_MODE_ONESHOT_STOPPED))
+				clockevents_set_mode(dev, CLOCK_EVT_MODE_ONESHOT);
+
+			if (!tick_program_event(expires, 0))
 				goto out;
+		}
 		/*
 		 * We are past the event already. So we crossed a
 		 * jiffie boundary. Update jiffies and raise the
@@ -889,6 +895,8 @@ ktime_t tick_nohz_get_sleep_length(void)
 
 static void tick_nohz_restart(struct tick_sched *ts, ktime_t now)
 {
+	struct clock_event_device *dev = __this_cpu_read(tick_cpu_device.evtdev);
+
 	hrtimer_cancel(&ts->sched_timer);
 	hrtimer_set_expires(&ts->sched_timer, ts->last_tick);
 
@@ -903,6 +911,10 @@ static void tick_nohz_restart(struct tick_sched *ts, ktime_t now)
 			if (hrtimer_active(&ts->sched_timer))
 				break;
 		} else {
+			/* Switchback to ONESHOT mode */
+			if (likely(dev->mode == CLOCK_EVT_MODE_ONESHOT_STOPPED))
+				clockevents_set_mode(dev, CLOCK_EVT_MODE_ONESHOT);
+
 			if (!tick_program_event(
 				hrtimer_get_expires(&ts->sched_timer), 0))
 				break;
