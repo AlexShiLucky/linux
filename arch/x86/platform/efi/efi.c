@@ -77,6 +77,8 @@ static __initdata efi_config_table_type_t arch_tables[] = {
 
 u64 efi_setup;		/* efi setup_data physical address */
 
+unsigned long x86_efi_facility;
+
 static bool __initdata disable_runtime = false;
 static int __init setup_noefi(char *arg)
 {
