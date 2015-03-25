@@ -108,6 +108,11 @@ static inline unsigned int tbase_get_irqsafe(struct tvec_base *base)
 	return ((unsigned int)(unsigned long)base & TIMER_IRQSAFE);
 }
 
+static inline unsigned int tbase_get_pinned(struct tvec_base *base)
+{
+	return ((unsigned int)(unsigned long)base & TIMER_PINNED);
+}
+
 static inline struct tvec_base *tbase_get_base(struct tvec_base *base)
 {
 	return ((struct tvec_base *)((unsigned long)base & ~TIMER_FLAG_MASK));
@@ -119,6 +124,13 @@ timer_set_base(struct timer_list *timer, struct tvec_base *new_base)
 	unsigned long flags = (unsigned long)timer->base & TIMER_FLAG_MASK;
 
 	timer->base = (struct tvec_base *)((unsigned long)(new_base) | flags);
+}
+
+static inline void
+timer_set_flags(struct timer_list *timer, unsigned int flags)
+{
+	timer->base = (struct tvec_base *)((unsigned long)(timer->base) |
+						flags);
 }
 
 static unsigned long round_jiffies_common(unsigned long j, int cpu,
@@ -792,8 +804,7 @@ static inline struct tvec_base *switch_timer_base(struct timer_list *timer,
 #endif
 
 static inline int
-__mod_timer(struct timer_list *timer, unsigned long expires,
-						bool pending_only, int pinned)
+__mod_timer(struct timer_list *timer, unsigned long expires, bool pending_only)
 {
 	struct tvec_base *base, *new_base;
 	unsigned long flags;
@@ -810,7 +821,7 @@ __mod_timer(struct timer_list *timer, unsigned long expires,
 
 	debug_activate(timer, expires);
 
-	cpu = get_nohz_timer_target(pinned);
+	cpu = get_nohz_timer_target(tbase_get_pinned(base));
 	new_base = per_cpu(tvec_bases, cpu);
 
 	if (base != new_base) {
@@ -846,7 +857,7 @@ out_unlock:
  */
 int mod_timer_pending(struct timer_list *timer, unsigned long expires)
 {
-	return __mod_timer(timer, expires, true, TIMER_NOT_PINNED);
+	return __mod_timer(timer, expires, true);
 }
 EXPORT_SYMBOL(mod_timer_pending);
 
@@ -921,7 +932,7 @@ int mod_timer(struct timer_list *timer, unsigned long expires)
 	if (timer_pending(timer) && timer->expires == expires)
 		return 1;
 
-	return __mod_timer(timer, expires, false, TIMER_NOT_PINNED);
+	return __mod_timer(timer, expires, false);
 }
 EXPORT_SYMBOL(mod_timer);
 
@@ -949,7 +960,8 @@ int mod_timer_pinned(struct timer_list *timer, unsigned long expires)
 	if (timer->expires == expires && timer_pending(timer))
 		return 1;
 
-	return __mod_timer(timer, expires, false, TIMER_PINNED);
+	timer_set_flags(timer, TIMER_PINNED);
+	return __mod_timer(timer, expires, false);
 }
 EXPORT_SYMBOL(mod_timer_pinned);
 
@@ -988,6 +1000,7 @@ void add_timer_on(struct timer_list *timer, int cpu)
 
 	timer_stats_timer_set_start_info(timer);
 	BUG_ON(timer_pending(timer) || !timer->function);
+	timer_set_flags(timer, TIMER_PINNED);
 	spin_lock_irqsave(&base->lock, flags);
 	timer_set_base(timer, base);
 	debug_activate(timer, timer->expires);
@@ -1564,7 +1577,7 @@ signed long __sched schedule_timeout(signed long timeout)
 	expire = timeout + jiffies;
 
 	setup_timer_on_stack(&timer, process_timeout, (unsigned long)current);
-	__mod_timer(&timer, expire, false, TIMER_NOT_PINNED);
+	__mod_timer(&timer, expire, false);
 	schedule();
 	del_singleshot_timer_sync(&timer);
 
