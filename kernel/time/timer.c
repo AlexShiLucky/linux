@@ -1754,6 +1754,13 @@ static void migrate_timers(int cpu)
 }
 #endif /* CONFIG_HOTPLUG_CPU */
 
+#ifdef CONFIG_CPUSETS
+void timer_quiesce_cpu(void *cpup)
+{
+	__migrate_timers(*(int *)cpup, false);
+}
+#endif /* CONFIG_CPUSETS */
+
 static int timer_cpu_notify(struct notifier_block *self,
 				unsigned long action, void *hcpu)
 {
