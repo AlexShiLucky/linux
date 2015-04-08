@@ -23,6 +23,7 @@ config X86
 	def_bool y
 	select HAVE_PREEMPT_LAZY if X86_32
 	select ARCH_HAS_DEBUG_STRICT_USER_COPY_CHECKS
+	select ARCH_HAS_GCOV_PROFILE_ALL
 	select ARCH_MIGHT_HAVE_PC_PARPORT
 	select ARCH_MIGHT_HAVE_PC_SERIO
 	select HAVE_AOUT if X86_32
@@ -858,7 +859,7 @@ source "kernel/Kconfig.preempt"
 
 config X86_UP_APIC
 	bool "Local APIC support on uniprocessors"
-	depends on X86_32 && !SMP && !X86_32_NON_STANDARD && !PCI_MSI
+	depends on X86_32 && !SMP && !X86_32_NON_STANDARD
 	---help---
 	  A local APIC (Advanced Programmable Interrupt Controller) is an
 	  integrated interrupt controller in the CPU. If you have a single-CPU
@@ -868,6 +869,10 @@ config X86_UP_APIC
 	  all. The local APIC supports CPU-generated self-interrupts (timer,
 	  performance counters), and the NMI watchdog which detects hard
 	  lockups.
+
+config X86_UP_APIC_MSI
+	def_bool y
+	select X86_UP_APIC if X86_32 && !SMP && !X86_32_NON_STANDARD && PCI_MSI
 
 config X86_UP_IOAPIC
 	bool "IO-APIC support on uniprocessors"
