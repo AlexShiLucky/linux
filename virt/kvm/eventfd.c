@@ -36,7 +36,6 @@
 #include <linux/seqlock.h>
 #include <trace/events/kvm.h>
 
-#include "ioapic.h"
 #include "iodev.h"
 
 #ifdef CONFIG_HAVE_KVM_IRQFD
