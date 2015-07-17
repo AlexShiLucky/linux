@@ -21,6 +21,17 @@
 
 #include "internals.h"
 
+#ifdef CONFIG_IRQ_FORCED_THREADING
+__read_mostly bool force_irqthreads;
+
+static int __init setup_forced_irqthreads(char *arg)
+{
+	force_irqthreads = true;
+	return 0;
+}
+early_param("threadirqs", setup_forced_irqthreads);
+#endif
+
 /**
  *	synchronize_irq - wait for pending IRQ handlers (on other CPUs)
  *	@irq: interrupt number to wait for
