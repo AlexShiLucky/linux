@@ -13,6 +13,8 @@ endif
 
 ifeq ($(quiet),silent_)
 silent := -s
+else
+silent := 
 endif
 
 # We need this, in case the user has it in its environment
