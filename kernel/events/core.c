@@ -4200,12 +4200,18 @@ static void calc_timer_values(struct perf_event *event,
 	*running = ctx_time - event->tstamp_running;
 }
 
+void __weak arch_perf_uspace_access(void *enable)
+{
+}
+
 static void perf_event_init_userpage(struct perf_event *event)
 {
 	struct perf_event_mmap_page *userpg;
 	struct ring_buffer *rb;
+	int enable = 1;
 
 	rcu_read_lock();
+	on_each_cpu(arch_perf_uspace_access, (void *)&enable, true);
 	rb = rcu_dereference(event->rb);
 	if (!rb)
 		goto unlock;
@@ -4434,6 +4440,7 @@ static void perf_mmap_open(struct vm_area_struct *vma)
 static void perf_mmap_close(struct vm_area_struct *vma)
 {
 	struct perf_event *event = vma->vm_file->private_data;
+	int disable = 0;
 
 	struct ring_buffer *rb = ring_buffer_get(event);
 	struct user_struct *mmap_user = rb->mmap_user;
@@ -4526,6 +4533,8 @@ again:
 
 out_put:
 	ring_buffer_put(rb); /* could be last */
+	if (!atomic_read(&rb->mmap_count))
+		on_each_cpu(arch_perf_uspace_access, (void *)&disable, true);
 }
 
 static const struct vm_operations_struct perf_mmap_vmops = {
