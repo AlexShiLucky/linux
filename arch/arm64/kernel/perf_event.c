@@ -1325,6 +1325,12 @@ void arch_perf_update_userpage(struct perf_event_mmap_page *userpg, u64 now)
 	userpg->cap_user_rdpmc = cpu_pmu->attr_rdpmc;
 }
 
+void arch_perf_uspace_access(void *enable)
+{
+	cpu_pmu->attr_rdpmc = *(int *)enable;
+	asm volatile("msr pmuserenr_el0, %0" : : "r" (!!*(int *)enable));
+}
+
 static void __init cpu_pmu_init(struct arm_pmu *armpmu)
 {
 	int cpu;
