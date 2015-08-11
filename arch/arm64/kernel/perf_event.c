@@ -634,6 +634,16 @@ static void armpmu_disable(struct pmu *pmu)
 	armpmu->stop();
 }
 
+static int armpmu_event_idx(struct perf_event *event)
+{
+	int idx = event->hw.idx;
+
+	if (!cpu_pmu->attr_rdpmc)
+		return 0;
+
+	return idx + 1;
+}
+
 static void __init armpmu_init(struct arm_pmu *armpmu)
 {
 	atomic_set(&armpmu->active_events, 0);
@@ -648,6 +658,7 @@ static void __init armpmu_init(struct arm_pmu *armpmu)
 		.start		= armpmu_start,
 		.stop		= armpmu_stop,
 		.read		= armpmu_read,
+		.event_idx	= armpmu_event_idx,
 	};
 }
 
@@ -1376,6 +1387,11 @@ device_initcall(register_pmu_driver);
 static struct pmu_hw_events *armpmu_get_cpu_events(void)
 {
 	return this_cpu_ptr(&cpu_hw_events);
+}
+
+void arch_perf_update_userpage(struct perf_event_mmap_page *userpg, u64 now)
+{
+	userpg->cap_user_rdpmc = cpu_pmu->attr_rdpmc;
 }
 
 static void __init cpu_pmu_init(struct arm_pmu *armpmu)
