@@ -21,6 +21,17 @@
 
 #include "internals.h"
 
+#ifdef CONFIG_IRQ_FORCED_THREADING
+__read_mostly bool force_irqthreads;
+
+static int __init setup_forced_irqthreads(char *arg)
+{
+	force_irqthreads = true;
+	return 0;
+}
+early_param("threadirqs", setup_forced_irqthreads);
+#endif
+
 static void __synchronize_hardirq(struct irq_desc *desc)
 {
 	bool inprogress;
@@ -84,13 +95,14 @@ void synchronize_irq(unsigned int irq)
 
 	if (desc) {
 		__synchronize_hardirq(desc);
-	    /*
-	     * We made sure that no hardirq handler is running. Now verify
-  	     * that no threaded handlers are active.
-	     */
-	    wait_event(desc->wait_for_threads,
-                   !atomic_read(&desc->threads_active));
-    }
+		/*
+		 * We made sure that no hardirq handler is
+		 * running. Now verify that no threaded handlers are
+		 * active.
+		 */
+		wait_event(desc->wait_for_threads,
+			   !atomic_read(&desc->threads_active));
+	}
 }
 EXPORT_SYMBOL(synchronize_irq);
 

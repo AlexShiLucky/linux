@@ -358,9 +358,9 @@ static inline int disable_irq_wake(unsigned int irq)
 
 
 #ifdef CONFIG_IRQ_FORCED_THREADING
-#define force_irqthreads	(true)
+extern bool force_irqthreads;
 #else
-#define force_irqthreads	(false)
+#define force_irqthreads	(0)
 #endif
 
 #ifndef __ARCH_SET_SOFTIRQ_PENDING
